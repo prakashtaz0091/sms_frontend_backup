@@ -19,11 +19,9 @@ const Classes = () => {
   const [assignedSubjects, setAssignedSubjects] = useState([
     { subjectId: "", teacherId: "" },
   ]);
-  const [classes, setClasses] = useState(
-    localStorage.getItem("classes")
-      ? JSON.parse(localStorage.getItem("classes"))
-      : []
-  );
+  const [classes, setClasses] = useState([]);
+
+
 
 
   const { api } = useContext(AuthContext);
@@ -78,14 +76,24 @@ const Classes = () => {
     setLoading(false)
 
 
-    const loadClasses=() => {
-      const savedClasses = localStorage.getItem("classes");
-      return savedClasses ? JSON.parse(savedClasses) : [];
+    // const loadClasses=() => {
+    //   const savedClasses = localStorage.getItem("classes");
+    //   return savedClasses ? JSON.parse(savedClasses) : [];
+    // }
+    // setClasses(loadClasses())
+
+
+    const loadClassSubjectsFromServer = async () => {
+      try {
+        const response = await api.get("/get_classes_and_subjects/");
+        setClasses(response.data);
+        localStorage.setItem("classes", JSON.stringify(response.data));
+        console.log(response.data);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
     }
-    setClasses(loadClasses())
-
-
-
+    loadClassSubjectsFromServer()
 
   },[api])
   //const [updated,setUpdated]=useState(false)
