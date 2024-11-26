@@ -122,42 +122,50 @@ const Classes = () => {
             class_id: parseInt(selectedClassId),
             subjects: assignedSubjects,
           });
-          console.log(response.data);
-        } catch (error) {
-          console.error("Error fetching data:", error);
+          // console.log(response.data);
+          updateUI()
+        } catch (error) { 
+          console.error("Error fetching data:", error.response.data.error[0]);
+          alert(error.response.data.error[0])
         }
       }
 
       sendToServer()
 
 
-      const classExists = classes.some(
-        (cls) => cls.id === parseInt(selectedClassId)
-      );
-
-      if (classExists) {
-        const updatedClasses = classes.map((cls) =>
-          cls.id === parseInt(selectedClassId)
-            ? { ...cls, subjects: [...cls.subjects, ...assignedSubjects] }
-            : cls
-        );
-        setClasses(updatedClasses);
-      } else {
-        const selectedClassName = classList.find(
+      const updateUI = () => {
+        const classExists = classes.some(
           (cls) => cls.id === parseInt(selectedClassId)
-        )?.name;
-        setClasses([
-          ...classes,
-          {
-            id: parseInt(selectedClassId),
-            name: selectedClassName,
-            subjects: assignedSubjects,
-          },
-        ]);
+        );
+  
+  
+  
+        if (classExists) {
+          const updatedClasses = classes.map((cls) =>
+            cls.id === parseInt(selectedClassId)
+              ? { ...cls, subjects: [...cls.subjects, ...assignedSubjects] }
+              : cls
+          );
+          setClasses(updatedClasses);
+        } else {
+          const selectedClassName = classList.find(
+            (cls) => cls.id === parseInt(selectedClassId)
+          )?.name;
+          setClasses([
+            ...classes,
+            {
+              id: parseInt(selectedClassId),
+              name: selectedClassName,
+              subjects: assignedSubjects,
+            },
+          ]);
+        }
+  
+        setSelectedClassId("");
+        setAssignedSubjects([{ subjectId: "", teacherId: "" }]);
       }
 
-      setSelectedClassId("");
-      setAssignedSubjects([{ subjectId: "", teacherId: "" }]);
+      
     }
   };
 
