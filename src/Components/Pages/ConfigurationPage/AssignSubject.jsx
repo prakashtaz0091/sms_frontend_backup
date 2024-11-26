@@ -88,7 +88,7 @@ const Classes = () => {
         const response = await api.get("/get_classes_and_subjects/");
         setClasses(response.data);
         localStorage.setItem("classes", JSON.stringify(response.data));
-        console.log(response.data);
+        // console.log(response.data);
       } catch (error) {
         console.error("Error fetching data:", error);
       }
@@ -125,7 +125,7 @@ const Classes = () => {
           // console.log(response.data);
           updateUI()
         } catch (error) { 
-          console.error("Error fetching data:", error.response.data.error[0]);
+          console.error("Error fetching data:", error);
           alert(error.response.data.error[0])
         }
       }
