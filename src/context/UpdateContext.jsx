@@ -23,7 +23,7 @@ export const UpdateContextProvider = ({ children }) => {
 
   const onUpdate=(classId, updatedSubjects) => {
     // console.log("Here i am onUpdate")
-    // console.log(classId,updatedSubjects)
+    console.log(classId,updatedSubjects)
     const updateSubjects = () => {
       try{
         const response = api.post("update_class_subjects/", updatedSubjects)

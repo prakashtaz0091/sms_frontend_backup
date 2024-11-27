@@ -28,10 +28,10 @@ const Table = ({ rows = [], onDelete }) => {
                   index % 2 === 0 ? "bg-[#BCA8EA]" : "bg-[#E3D6FF]"
                 }`}
               >
-                <td className="p-2 text-center">{row.nameOfHead}</td>
+                <td className="p-2 text-center">{row.head}</td>
                 <td className="p-2 text-center">{row.type}</td>
                 <td className="p-2 text-center">
-                  <button className="p-1 text-black transition-colors duration-300 hover:bg-red-600 hover:text-white" onClick={() => onDelete(index)}>
+                  <button className="p-1 text-black transition-colors duration-300 hover:bg-red-600 hover:text-white" onClick={() => onDelete(row.id)}>
                     <RiDeleteBin6Line className="hover:text-lg"/>
                   </button>
                 </td>

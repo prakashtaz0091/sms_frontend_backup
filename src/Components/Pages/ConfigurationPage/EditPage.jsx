@@ -28,6 +28,8 @@ const EditPage = () => {
 
   const handleUpdate = () => {
     if (onUpdate) {
+      console.log(subjects);
+      
       onUpdate(updateState.classId, subjects);
     }
     navigate(-1); // Navigate back
