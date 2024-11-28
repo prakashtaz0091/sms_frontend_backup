@@ -5,21 +5,29 @@ import {AuthContext} from "../../../context/AuthContext"
 // Function to filter the data based on date
 const filterExpenses = (expenses, filterType, fromDate, toDate) => {
   const today = new Date();
-  const currentMonth = today.getMonth();
-  const currentYear = today.getFullYear();
+
+
 
   if (filterType === "thisMonth") {
+    //get this month
+    const currentMonth = today.getMonth()+1;
+    
     return expenses.filter((expense) => {
-      const expenseDate = new Date(expense.date.split("-").reverse().join("-"));
-      return expenseDate.getMonth() === currentMonth && expenseDate.getFullYear() === currentYear;
+      
+      const expenseMonth = expense.date.split("-")[1]
+      
+      return expenseMonth == currentMonth;
     });
   } else if (filterType === "range" && fromDate && toDate) {
-    const from = new Date(fromDate);
-    const to = new Date(toDate);
-    return expenses.filter((expense) => {
-      const expenseDate = new Date(expense.date.split("-").reverse().join("-"));
-      return expenseDate >= from && expenseDate <= to;
-    });
+    const fromDateObj = fromDate ? new Date(fromDate) : null;
+    const toDateObj = toDate ? new Date(toDate) : null;  
+
+    if (fromDateObj && toDateObj) {
+      return expenses.filter((expense) => {
+        const expenseDate = new Date(expense.date);
+        return expenseDate >= fromDateObj && expenseDate <= toDateObj;
+      });
+    }
   }
 
   return expenses;

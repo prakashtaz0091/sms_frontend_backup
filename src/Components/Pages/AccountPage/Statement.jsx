@@ -109,7 +109,7 @@ const Statement = () => {
           </div>
 
           {/* "This Month" Button */}
-          <span className="flex items-center justify-center  bg-white rounded-full">
+          <span className={filterType=="thisMonth"?"flex items-center justify-center rounded-full bg-indigo-200":"flex items-center bg-white justify-center rounded-full"} >
             <SlCalender className="text-gray-600 ml-3 cursor-pointer" size={24} onClick={handleThisMonth}/>
             <button onClick={handleThisMonth} className="py-2 px-2 bg-transparent">
               This Month
