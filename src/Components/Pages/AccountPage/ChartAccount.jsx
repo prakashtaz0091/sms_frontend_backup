@@ -9,6 +9,7 @@ import { AuthContext } from "../../../context/AuthContext";
 const ChartAccount = () => {
   const [rows, setRows] = useState([]);
   const [filteredRows, setFilteredRows] = useState([]);
+  const [allRows, setAllRows] = useState([]);
   const [searchTerm, setSearchTerm] = useState(""); // For search functionality
   const [newHead, setNewHead] = useState("");
   const [newType, setNewType] = useState("");
@@ -21,6 +22,7 @@ const ChartAccount = () => {
         const response = await api.get("/get_chart_of_accounts/");
         setRows(response.data);
         setFilteredRows(response.data);
+        setAllRows(response.data);
       } catch (error) {
         console.log(error);
       }

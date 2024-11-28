@@ -7,12 +7,21 @@ import { IoFilterSharp } from "react-icons/io5";
 import { SlCalender } from "react-icons/sl";
 import StatementTable from "./StatementTable";
 import {IoIosArrowDropleft,IoIosArrowDropright} from 'react-icons/io'
+import { parse } from "date-fns";
 
 const Statement = () => {
 
   const [fromDate, setFromDate] = useState(""); // Store from date
   const [toDate, setToDate] = useState(""); // Store to date
   const [filterType, setFilterType] = useState("all"); // To track "This Month" or "All" filter
+  
+  const [pagination, setPagination] = useState({
+    currentPage: 1,
+    recordsPerPage: 10,
+    totalRecords: 0,
+    totalPages: 1
+  });
+
 
   // Function to handle the search button click and filter dates
   const handleSearch = () => {
@@ -24,6 +33,7 @@ const Statement = () => {
   // Function to handle "This Month" button click
   const handleThisMonth = () => {
     setFilterType("thisMonth");
+    setPagination({...pagination, currentPage: 1, recordsPerPage: 10})
   };
 
   // Function to reset filters when the refresh button is clicked
@@ -31,6 +41,11 @@ const Statement = () => {
     setFromDate("");
     setToDate("");
     setFilterType("all");
+    setPagination({
+      ...pagination,
+      currentPage: 1,
+      recordsPerPage: 10
+    })
   };
    // Function to print only the StatementTable
    const handlePrint = () => {
@@ -68,6 +83,18 @@ const Statement = () => {
     printWindow.close();
   };
   const tableRef = useRef(); // Create a ref for the table
+
+
+  const setRecordsPerPage = (recordsPerPage) => {
+    setPagination((prevPagination) => ({
+      ...prevPagination,
+      recordsPerPage: parseInt(recordsPerPage),
+      currentPage: 1,
+      totalPages: Math.ceil(prevPagination.totalRecords / parseInt(recordsPerPage)),
+    }));
+  };
+
+
 
   return (
     <div className="p-8 bg-pink-100">
@@ -133,31 +160,40 @@ const Statement = () => {
       </div>
 
       <div className="pt-6" ref={tableRef}>
-        <StatementTable filterType={filterType} fromDate={fromDate} toDate={toDate} />
+        <StatementTable filterType={filterType} fromDate={fromDate} toDate={toDate} pagination={pagination} setPagination={setPagination} />
       </div>
       <div className="mt-4 flex justify-between items-center pb-10">
         <div className="flex space-x-2 items-center">
-          <button className="px-3 py-2 border border-gray-400 rounded-full ">
+          <button className={pagination.recordsPerPage == 10 ? "bg-[#BCA8EA] text-white px-3 py-2 border border-gray-400 rounded-full " : "px-3 py-2 border border-gray-400 rounded-full "} value="10" onClick={(e) => setRecordsPerPage(e.currentTarget.value)}>
             10
           </button>
-          <button className="px-3 py-2 border border-gray-400 rounded-full ">
+          <button className={pagination.recordsPerPage == 25 ? "bg-[#BCA8EA] text-white px-3 py-2 border border-gray-400 rounded-full " : "px-3 py-2 border border-gray-400 rounded-full "} value="25" onClick={(e) => setRecordsPerPage(e.currentTarget.value)} >
             25
           </button>
-          <button className="px-3 py-2 border border-gray-400 rounded-full ">
+          <button className={pagination.recordsPerPage == 50 ? "bg-[#BCA8EA] text-white px-3 py-2 border border-gray-400 rounded-full " : "px-3 py-2 border border-gray-400 rounded-full "}  value="50" onClick={(e) => setRecordsPerPage(e.currentTarget.value)}>
             50
           </button>
           <p>Records per page </p>
         </div>
         <div className="flex flex-row items-center">
           <div className="text-sm text-gray-600 ">
-            Showing 1 to 25 of 78 records
+            Showing {
+               pagination.totalRecords == 0 ? 0 : pagination.currentPage * pagination.recordsPerPage - (pagination.recordsPerPage - 1) 
+            } &nbsp; to &nbsp;
+            {
+              pagination.currentPage * pagination.recordsPerPage > pagination.totalRecords
+                ? pagination.totalRecords
+                : pagination.currentPage * pagination.recordsPerPage
+            } &nbsp;
+            
+             of {pagination.totalRecords} records
           </div>
           <div className="flex space-x-2 items-center">
-            <button className="px-3  ">
+            <button className="px-3  " onClick={()=>pagination.currentPage>1 && setPagination({...pagination,currentPage:pagination.currentPage-1})}>
               <IoIosArrowDropleft size={30} />
             </button>
-            <p className="border border-gray-700 px-2 rounded-full"> 1</p>
-            <button className="px-3 ">
+            <p className="border border-gray-700 px-2 rounded-full"> {pagination.currentPage}</p>
+            <button className="px-3 " onClick={()=>pagination.currentPage<pagination.totalPages && setPagination({...pagination,currentPage:pagination.currentPage+1})}>
               <IoIosArrowDropright size={30} />
             </button>
           </div>

@@ -33,7 +33,7 @@ const filterExpenses = (expenses, filterType, fromDate, toDate) => {
   return expenses;
 };
 
-const StatementTable = ({ filterType, fromDate, toDate }) => {
+const StatementTable = ({ filterType, fromDate, toDate, pagination, setPagination }) => {
 
   const {api} = useContext(AuthContext);
 
@@ -48,6 +48,12 @@ const StatementTable = ({ filterType, fromDate, toDate }) => {
         // setExpenses(response.data);
         // console.log(response.data);
         setIncomeExpenses(response.data);
+        setPagination({
+          ...pagination,
+          totalRecords: response.data.length,
+          totalPages: Math.ceil(response.data.length / pagination.recordsPerPage),
+        })
+        
         
       } catch (error) {
         console.error("Error fetching income and expenses:", error);
@@ -58,15 +64,52 @@ const StatementTable = ({ filterType, fromDate, toDate }) => {
 
 }, [api]);
 
+ const applyPagination = (records) => {
+  let startIndex = pagination.totalRecords == 0 ? 0 : pagination.currentPage * pagination.recordsPerPage - (pagination.recordsPerPage);
+    let endIndex = pagination.currentPage * pagination.recordsPerPage > pagination.totalRecords
+    ? pagination.totalRecords
+    : pagination.currentPage * pagination.recordsPerPage
+    console.log(startIndex, endIndex);
+    
+    setFilteredIncomeExpenses(records.slice(startIndex, endIndex));
+   
+ }
+
+  useEffect(() => {
+    
+    if (filterType === "all") {
+      applyPagination(incomeExpenses);
+    }
+    else{
+
+      applyPagination(filterExpenses(incomeExpenses, filterType, fromDate, toDate));
+    }
+
+
+  }, [pagination]);
+
+
+
+
   // Filter the data based on filterType
-  const filteredIncomeExpenses = filterExpenses(incomeExpenses, filterType, fromDate, toDate);
+  const [filteredIncomeExpenses, setFilteredIncomeExpenses] = useState([]);
+    useEffect(() => {
+      const filteredData = filterExpenses(incomeExpenses, filterType, fromDate, toDate);
+      setPagination({
+        ...pagination,
+        totalRecords: filteredData.length,
+        totalPages: Math.ceil(filteredData.length / pagination.recordsPerPage),
+      })
+      setFilteredIncomeExpenses(filteredData);
+      // applyPagination(filteredData);
+    }, [incomeExpenses, filterType, fromDate, toDate]); // Dependencies
 
   // Total income and expense calculations
-      const totalExpense = filteredIncomeExpenses
+  const totalExpense = filteredIncomeExpenses 
       .filter(item => item.head_type === "expense") // Filter only expenses
       .reduce((acc, item) => acc + parseFloat(item.amount), 0);
 
-    const totalIncome = filteredIncomeExpenses
+  const totalIncome = filteredIncomeExpenses
       .filter(item => item.head_type === "income") // Filter only income
       .reduce((acc, item) => acc + parseFloat(item.amount), 0);  const profitOrLoss = totalIncome - totalExpense;
 
@@ -79,6 +122,8 @@ const StatementTable = ({ filterType, fromDate, toDate }) => {
     if (confirmDelete) {
         const updatedExpenses = incomeExpenses.filter(item => item.id !== id);
         setIncomeExpenses(updatedExpenses);
+        setPagination({...pagination, totalRecords: updatedExpenses.length, totalPages: Math.ceil(updatedExpenses.length / pagination.recordsPerPage),
+        });
 
 
         // Make the API call to delete the expense
@@ -143,7 +188,9 @@ const StatementTable = ({ filterType, fromDate, toDate }) => {
           <tr>
             <td className="p-2" colSpan="5">
               <div className="border border-gray-500 p-2">
-                <span className="font-bold">Profit / Loss - </span>
+                <span className="font-bold">
+                  {profitOrLoss >= 0 ? " Profit" : " Loss"} - &nbsp; &nbsp;
+                </span>
                 <span className={profitOrLoss >= 0 ? "text-green-500" : "text-red-500"}>
                   {profitOrLoss.toLocaleString()}
                 </span>
