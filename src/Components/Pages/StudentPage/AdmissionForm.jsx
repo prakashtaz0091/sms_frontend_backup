@@ -14,7 +14,24 @@ function AdmissionForm() {
 
   const {api} = useContext(AuthContext);
 
+  const [classes, setClasses] = useState([]);
 
+
+  useEffect(() => {
+    const loadClassListFromServer = async () => {
+      try {
+        const response = await api.get("/get_classes_for_config/");
+        setClasses(response.data);
+        console.log(response.data);
+        
+        localStorage.setItem("classes_for_config", JSON.stringify(response.data));
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+
+    loadClassListFromServer();
+  }, [api]);
 
 
 
@@ -333,7 +350,7 @@ function AdmissionForm() {
         FORMDATA.append(key, formData[key]);        
         
       }
-
+      
       const token = auth.token;  // Replace with your actual token
       // console.log(token);
       
@@ -569,11 +586,13 @@ function AdmissionForm() {
                 <option value="" disabled selected>
                   Select Class
                 </option>
-                <option value="Class 1">Class 1</option>
-                <option value="Class 2">Class 2</option>
-                <option value="Class 3">Class 3</option>
-                <option value="Class 4">Class 4</option>
-                <option value="Class 5">Class 5</option>
+                {
+                  classes && classes.map((classItem) => (
+                    <option key={classItem.id} value={classItem.id}>
+                      {classItem.name}
+                    </option>
+                  ))
+                }
               </select>
               {errors.classOfAdmission && (
                 <p className="text-red-500 text-sm">
