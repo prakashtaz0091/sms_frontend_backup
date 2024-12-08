@@ -158,8 +158,21 @@ const Edit = () => {
       }
     }
 
+    const deleteExamPaperFromDB = async () => {
+      try {
+        const response = await api.delete(
+          `/delete_exam_paper/${exam_paper_id}/`
+        );
+        response.status === 204 && alert("Exam paper deleted successfully");
+      } catch (error) {
+        // console.error("Error deleting exam paper:", error);
+        alert("Failed to delete exam paper");
+      }
+    };
+
     // Update the state with the modified data
     setOrgData(updatedOrgData);
+    deleteExamPaperFromDB();
   };
 
   return examSessions && orgData ? (
