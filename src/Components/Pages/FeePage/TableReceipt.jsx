@@ -23,7 +23,6 @@ function TableReceipt({
     const getMonths = async () => {
       try {
         const response = await api.get("/get_months/");
-        console.log(response.data);
 
         setMonths(response.data);
       } catch (error) {
