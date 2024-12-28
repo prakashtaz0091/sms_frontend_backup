@@ -9,17 +9,20 @@ import SearchCompo from "./Components/StdSearch";
 import { AuthContext } from "../../../context/AuthContext";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-
-// Function to get the number of days in a given month and year
-const getMonthDates = (year, month) => {
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
-  return Array.from({ length: daysInMonth }, (_, i) => i + 1);
-};
+import { IoIosArrowDropleft, IoIosArrowDropright } from "react-icons/io";
+import { set } from "date-fns";
 
 const StudentAttendanceReport = () => {
   const { api } = useContext(AuthContext);
   const [classList, setClassList] = useState([]);
   const [selectedClass, setSelectedClass] = useState("");
+  const [pagination, setPagination] = useState({
+    currentPage: 1,
+    recordsPerPage: 10,
+    totalRecords: 0,
+    totalPages: 1,
+  });
+
   useEffect(() => {
     const loadClassListFromServer = async () => {
       try {
@@ -33,15 +36,13 @@ const StudentAttendanceReport = () => {
     loadClassListFromServer();
   }, [api]);
 
-  const now = new Date();
-  const [currentMonthIndex, setCurrentMonthIndex] = useState(now.getMonth());
   const [year, setYear] = useState("");
   const [month, setMonth] = useState("");
 
   // Get dates for the currently selected month
-  const dates = getMonthDates(year, currentMonthIndex);
 
-  const [students, setStudents] = useState([]);
+  const [initialStudents, setInitialStudents] = useState([]);
+  const [students, setStudents] = useState(initialStudents);
 
   // Handle month changes
   const handlePreviousMonth = () => {
@@ -117,7 +118,24 @@ const StudentAttendanceReport = () => {
   }, []);
 
   const [selectedDate, setSelectedDate] = useState("");
-  // const [filteredStudents, setFilteredStudents] = useState(students);
+  const applyPagination = () => {
+    let startIndex =
+      pagination.totalRecords == 0
+        ? 0
+        : pagination.currentPage * pagination.recordsPerPage -
+          pagination.recordsPerPage;
+    let endIndex =
+      pagination.currentPage * pagination.recordsPerPage >
+      pagination.totalRecords
+        ? pagination.totalRecords
+        : pagination.currentPage * pagination.recordsPerPage;
+
+    setStudents(initialStudents.slice(startIndex, endIndex));
+  };
+
+  useEffect(() => {
+    applyPagination();
+  }, [pagination]);
 
   const getClassAttendanceByMonth = async (year, month) => {
     try {
@@ -125,12 +143,40 @@ const StudentAttendanceReport = () => {
         `/get_class_attendance_by_month/${year}/${month}/${selectedClass}/`
       );
       // console.log(response.data);
-      setStudents(response.data);
+      setInitialStudents(response.data);
+      setPagination({
+        currentPage: 1,
+        recordsPerPage: 10,
+        totalRecords: response.data.length,
+        totalPages: Math.ceil(response.data.length / pagination.recordsPerPage),
+      });
     } catch (error) {
       // alert(error.data.message);
+      setInitialStudents([]);
       setStudents([]);
+      resetPagination();
       alert(error.response.data.message);
     }
+  };
+
+  const resetPagination = () => {
+    setPagination({
+      currentPage: 1,
+      recordsPerPage: 10,
+      totalRecords: 0,
+      totalPages: 1,
+    });
+  };
+
+  const setRecordsPerPage = (recordsPerPage) => {
+    setPagination((prevPagination) => ({
+      ...prevPagination,
+      recordsPerPage: parseInt(recordsPerPage),
+      currentPage: 1,
+      totalPages: Math.ceil(
+        prevPagination.totalRecords / parseInt(recordsPerPage)
+      ),
+    }));
   };
 
   // Handle search functionality (Modified)
@@ -150,7 +196,6 @@ const StudentAttendanceReport = () => {
   const handleRefresh = () => {
     setSelectedClass("");
     setSelectedDate("");
-    setFilteredStudents(students); // Reset to original data
   };
 
   return (
@@ -313,23 +358,86 @@ const StudentAttendanceReport = () => {
       {/* Pagination */}
       <div className="flex justify-between items-center mt-4 pl-2">
         <div className="flex items-center space-x-2">
-          {[10, 25, 50].map((size) => (
-            <button className="p-2 px-3 rounded-full border border-gray-300">
-              {size}
-            </button>
-          ))}
-          <span className="text-sm">Records per page</span>
+          <button
+            className={
+              pagination.recordsPerPage == 10
+                ? "bg-[#BCA8EA] text-white px-3 py-2 border border-gray-400 rounded-full "
+                : "px-3 py-2 border border-gray-400 rounded-full "
+            }
+            value="10"
+            onClick={(e) => setRecordsPerPage(e.currentTarget.value)}
+          >
+            10
+          </button>
+          <button
+            className={
+              pagination.recordsPerPage == 25
+                ? "bg-[#BCA8EA] text-white px-3 py-2 border border-gray-400 rounded-full "
+                : "px-3 py-2 border border-gray-400 rounded-full "
+            }
+            value="25"
+            onClick={(e) => setRecordsPerPage(e.currentTarget.value)}
+          >
+            25
+          </button>
+          <button
+            className={
+              pagination.recordsPerPage == 50
+                ? "bg-[#BCA8EA] text-white px-3 py-2 border border-gray-400 rounded-full "
+                : "px-3 py-2 border border-gray-400 rounded-full "
+            }
+            value="50"
+            onClick={(e) => setRecordsPerPage(e.currentTarget.value)}
+          >
+            50
+          </button>
+          <p>Records per page </p>
         </div>
 
         <div className="flex space-x-1 items-center pr-2">
-          <p>Showing 1 to 10 of 15 records</p>
-          <button className="p-1 rounded-full border border-gray-300">
-            <MdChevronLeft size={24} />
-          </button>
-          <p className="border border-gray-300 px-3 py-1 rounded-full">1</p>
-          <button className="p-1 rounded-full border border-gray-300">
-            <MdChevronRight size={24} />
-          </button>
+          <div className="text-sm text-gray-600 ">
+            Showing{" "}
+            {pagination.totalRecords == 0
+              ? 0
+              : pagination.currentPage * pagination.recordsPerPage -
+                (pagination.recordsPerPage - 1)}{" "}
+            &nbsp; to &nbsp;
+            {pagination.currentPage * pagination.recordsPerPage >
+            pagination.totalRecords
+              ? pagination.totalRecords
+              : pagination.currentPage * pagination.recordsPerPage}{" "}
+            &nbsp; of {pagination.totalRecords} records
+          </div>
+          <div className="flex space-x-2 items-center">
+            <button
+              className="px-3  "
+              onClick={() =>
+                pagination.currentPage > 1 &&
+                setPagination({
+                  ...pagination,
+                  currentPage: pagination.currentPage - 1,
+                })
+              }
+            >
+              <IoIosArrowDropleft size={30} />
+            </button>
+            <p className="border border-gray-700 px-2 rounded-full">
+              {" "}
+              {pagination.currentPage}
+            </p>
+            <button
+              className="px-3 "
+              onClick={() =>
+                pagination.currentPage < pagination.totalPages &&
+                setPagination({
+                  ...pagination,
+                  currentPage: pagination.currentPage + 1,
+                })
+              }
+            >
+              <IoIosArrowDropright size={30} />
+            </button>
+          </div>
         </div>
       </div>
 
