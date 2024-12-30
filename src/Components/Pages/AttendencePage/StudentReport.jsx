@@ -196,6 +196,10 @@ const StudentAttendanceReport = () => {
   const handleRefresh = () => {
     setSelectedClass("");
     setSelectedDate("");
+    setMonth("");
+    setYear("");
+    setInitialStudents([]);
+    setStudents([]);
   };
 
   return (
@@ -271,7 +275,9 @@ const StudentAttendanceReport = () => {
           <FaChevronLeft className="text-gray-600 hover:text-gray-800" />
         </button>
         <h2 className="mx-4 text-lg font-semibold">
-          {month ? months[month - 1] : ""} {year && year}
+          {month && year
+            ? `${months[month - 1]} ${year}`
+            : "Please select a date"}
         </h2>
         <button onClick={handleNextMonth}>
           <FaChevronRight className="text-gray-600 hover:text-gray-800" />
@@ -442,7 +448,7 @@ const StudentAttendanceReport = () => {
       </div>
 
       {/* Search */}
-      <SearchCompo />
+      {/* <SearchCompo /> */}
       <Table />
     </div>
   );
