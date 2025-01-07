@@ -69,10 +69,10 @@ const EmployeeReport = () => {
     setEmployees([]);
   };
 
-  const get_class_employee_attendance_by_month = async (year, month) => {
+  const get_employee_attendance_by_month = async (year, month) => {
     try {
       const response = await api.get(
-        `/get_class_employee_attendance_by_month/${year}/${month}/`
+        `/get_employee_attendance_by_month/${year}/${month}/`
       );
       setInitialEmployees(response.data);
       setPagination({
@@ -97,7 +97,7 @@ const EmployeeReport = () => {
     }
     const newMonth = parseInt(selectedDate.getMonth() + 1);
     const newYear = parseInt(selectedDate.getFullYear());
-    get_class_employee_attendance_by_month(newYear, newMonth);
+    get_employee_attendance_by_month(newYear, newMonth);
     setYear(newYear);
     setMonth(newMonth);
   };
@@ -107,32 +107,31 @@ const EmployeeReport = () => {
     if (month == 1) {
       const newMonth = 12;
       const newYear = year - 1;
-      get_class_employee_attendance_by_month(newYear, newMonth);
+      get_employee_attendance_by_month(newYear, newMonth);
       setYear(newYear);
       setMonth(newMonth);
     } else {
       const newMonth = month - 1;
-      get_class_employee_attendance_by_month(year, newMonth);
+      get_employee_attendance_by_month(year, newMonth);
       setMonth(newMonth);
     }
   };
 
   const handleNextMonth = () => {
     const now = new Date();
-    const currentMonth = now.getMonth();
-    const validMonth = month <= currentMonth;
+
     const currentYear = now.getFullYear();
     const validYear = year <= currentYear;
-    if (validYear && validMonth) {
+    if (validYear) {
       if (month == 12) {
         const newYear = year + 1;
         const newMonth = 1;
-        get_class_employee_attendance_by_month(newYear, newMonth);
+        get_employee_attendance_by_month(newYear, newMonth);
         setYear(newYear);
         setMonth(newMonth);
       } else {
         const newMonth = month + 1;
-        get_class_employee_attendance_by_month(year, newMonth);
+        get_employee_attendance_by_month(year, newMonth);
         setMonth(newMonth);
       }
     }

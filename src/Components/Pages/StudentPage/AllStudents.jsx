@@ -8,7 +8,7 @@ import { FiRefreshCcw } from "react-icons/fi";
 import { IoFilterSharp } from "react-icons/io5";
 import { MdCancel } from "react-icons/md";
 import axios from "axios";
-import {AuthContext} from "../../../context/AuthContext";
+import { AuthContext } from "../../../context/AuthContext";
 
 const baseUrl = import.meta.env.VITE_API_BASE_URL;
 
@@ -18,9 +18,7 @@ const AllStudents = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [originalRows, setOriginalRows] = useState([]); // Store original data before editing
-
-
-
+  const [classes, setClasses] = useState([]);
 
   const { api } = useContext(AuthContext);
 
@@ -28,10 +26,6 @@ const AllStudents = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Optionally log the current access token
-        const accessToken = localStorage.getItem("access_token");
-        // console.log("Current Access Token:", accessToken);
-  
         const response = await api.get("/student/");
         console.log(response.data);
         setRows(response.data);
@@ -45,24 +39,43 @@ const AllStudents = () => {
           // console.error("Response data:", error.response.data);
         }
       }
+      try {
+        const response = await api.get("/get_classes_for_config/");
+        // console.log(response.data);
+
+        setClasses(response.data);
+      } catch (error) {
+        console.log(error);
+      }
     };
-  
+
     fetchData();
   }, [api]);
-  
 
   const filterRows = (criteria) => {
     const lowercasedCriteria = criteria.toLowerCase();
 
     const filtered = rows.filter((row) => {
-      const { enrollmentId, name, gender, class: studentClass, phoneNo, fatherName } = row;
+      const {
+        enrollmentId,
+        name,
+        gender,
+        class: studentClass,
+        phoneNo,
+        fatherName,
+      } = row;
 
-      const matchesEnrollmentId = enrollmentId.toLowerCase().includes(lowercasedCriteria);
+      const matchesEnrollmentId = enrollmentId
+        .toLowerCase()
+        .includes(lowercasedCriteria);
       const matchesName = name.toLowerCase().includes(lowercasedCriteria);
       const matchesGender = gender.toLowerCase() === lowercasedCriteria; // Exact match for gender
       const matchesPhoneNo = phoneNo.toLowerCase().includes(lowercasedCriteria);
-      const matchesFatherName = fatherName.toLowerCase().includes(lowercasedCriteria);
-      const matchesClass = String(studentClass).toLowerCase() === lowercasedCriteria; // Exact match for class
+      const matchesFatherName = fatherName
+        .toLowerCase()
+        .includes(lowercasedCriteria);
+      const matchesClass =
+        String(studentClass).toLowerCase() === lowercasedCriteria; // Exact match for class
 
       return (
         matchesEnrollmentId ||
@@ -74,7 +87,9 @@ const AllStudents = () => {
       );
     });
 
-    setFilteredRows(filtered.length > 0 ? filtered : [{ message: "No data found" }]);
+    setFilteredRows(
+      filtered.length > 0 ? filtered : [{ message: "No data found" }]
+    );
   };
 
   const handleSearch = () => {
@@ -87,19 +102,20 @@ const AllStudents = () => {
   };
 
   const handleDelete = async (index, studentId) => {
-    const confirmDelete = window.confirm("Are you sure you want to delete this item?");
-  
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete this item?"
+    );
+
     if (confirmDelete) {
       try {
-        
         // Make the API call to delete the student
         await api.delete(`/student/${studentId}/`);
-  
+
         // Filter out the deleted student from the state
         const newRows = filteredRows.filter((_, i) => i !== index);
         setRows(newRows);
         setFilteredRows(newRows);
-        
+
         // alert("Student deleted successfully.");
       } catch (error) {
         console.error("Error deleting student:", error);
@@ -124,7 +140,7 @@ const AllStudents = () => {
     // Split the name using whitespace
 
     if (!name) {
-        return { firstName: '', lastName: '', middleName: '' };
+      return { firstName: "", lastName: "", middleName: "" };
     }
     const words = name.trim().split(/\s+/);
 
@@ -132,32 +148,29 @@ const AllStudents = () => {
     let firstName, lastName, middleName;
 
     if (words.length === 1) {
-        // If there is only one word, treat it as the first name
-        firstName = words[0];
-        lastName = '';
-        middleName = '';
+      // If there is only one word, treat it as the first name
+      firstName = words[0];
+      lastName = "";
+      middleName = "";
     } else if (words.length === 2) {
-        // If there are two words, assign them to first and last name
-        firstName = words[0];
-        lastName = words[1];
-        middleName = '';
+      // If there are two words, assign them to first and last name
+      firstName = words[0];
+      lastName = words[1];
+      middleName = "";
     } else {
-        // For three or more words
-        firstName = words[0]; // First word
-        lastName = words[words.length - 1]; // Last word
-        // Join the remaining words for middleName
-        middleName = words.slice(1, words.length - 1).join(' ');
+      // For three or more words
+      firstName = words[0]; // First word
+      lastName = words[words.length - 1]; // Last word
+      // Join the remaining words for middleName
+      middleName = words.slice(1, words.length - 1).join(" ");
     }
 
-    
-
     return {
-        firstName,
-        lastName,
-        middleName
+      firstName,
+      lastName,
+      middleName,
     };
   }
-
 
   const handleSave = async (index) => {
     const student = filteredRows[index];
@@ -165,13 +178,12 @@ const AllStudents = () => {
 
     const stuObj = splitName(student.name);
     const fatherObj = splitName(student.fatherName);
-    
-  
+
     const updatedData = {
       // Add your fields here that you want to update
-      studentFirstName: stuObj.firstName, 
+      studentFirstName: stuObj.firstName,
       studentMiddleName: stuObj.middleName,
-      studentLastName: stuObj.lastName, 
+      studentLastName: stuObj.lastName,
       fatherFirstName: fatherObj.firstName,
       fatherMiddleName: fatherObj.middleName,
       fatherLastName: fatherObj.lastName,
@@ -180,23 +192,23 @@ const AllStudents = () => {
       phoneNumber: student.phoneNumber,
     };
     // console.log("updatedData", updatedData);
-    
+
     // Create a new FormData object
     const FORMDATA = new FormData();
-    
+
     // Append each field to the FormData object
     for (const key in updatedData) {
       //check that key is not empty
       console.log(key);
-      
-      if (key == 'studentMiddleName' || key == 'fatherMiddleName') { // this means, if middlename is empty commit it as empty to database
+
+      if (key == "studentMiddleName" || key == "fatherMiddleName") {
+        // this means, if middlename is empty commit it as empty to database
         if (updatedData.hasOwnProperty(key)) {
           FORMDATA.append(key, updatedData[key]);
         }
-        
-      }else{ // this means, if key is not middlename then first check for not empty then only commit to database
-        if ( updatedData[key]!== ''){ 
-          
+      } else {
+        // this means, if key is not middlename then first check for not empty then only commit to database
+        if (updatedData[key] !== "") {
           if (updatedData.hasOwnProperty(key)) {
             FORMDATA.append(key, updatedData[key]);
           }
@@ -207,10 +219,14 @@ const AllStudents = () => {
     try {
       // Make the API call to update the student
       const response = await api.patch(`/student/${student.id}/`, FORMDATA);
-      
+
       // Update the row with the new data
       const newRows = [...filteredRows];
-      newRows[index] = { ...newRows[index], ...response.data, isEditing: false }; // Update the row with response data
+      newRows[index] = {
+        ...newRows[index],
+        ...response.data,
+        isEditing: false,
+      }; // Update the row with response data
       setFilteredRows(newRows);
     } catch (error) {
       console.error("Failed to update student data:", error);
@@ -218,17 +234,17 @@ const AllStudents = () => {
     }
   };
 
-
   const handleChange = (index, field, value) => {
     const newRows = [...filteredRows];
     // console.log(index, field, value);
-    
+
     newRows[index][field] = value; // Update the specific field
     setFilteredRows(newRows);
   };
 
-  return (
-    isLoading ? <div>Loading...</div> : 
+  return isLoading ? (
+    <div>Loading...</div>
+  ) : (
     <>
       <div className="p-8 bg-pink-100">
         <div className="flex gap-4 bg-white rounded-3xl p-2">
@@ -300,30 +316,27 @@ const AllStudents = () => {
                   filteredRows.map((row, index) => (
                     <tr
                       key={index}
-                      className={`border border-gray-300 ${index % 2 === 0 ? "bg-[#BCA8EA]" : "bg-[#E3D6FF]"}`}
+                      className={`border border-gray-300 ${
+                        index % 2 === 0 ? "bg-[#BCA8EA]" : "bg-[#E3D6FF]"
+                      }`}
                     >
-                      <td className="p-2 text-center">
-                        {row.isEditing ? (
-                          <input
-                            type="text"
-                            value={row.enrollmentId}
-                            readOnly
-                            className="border rounded w-full py-1 px-2"
-                          />
-                        ) : (
-                          row.enrollmentId
-                        )}
-                      </td>
+                      <td className="p-2 text-center">{row.enrollmentId}</td>
                       <td className="p-2 text-center">
                         {row.isEditing ? (
                           <input
                             type="text"
                             value={row.name}
-                            onChange={(e) => handleChange(index, "name", e.target.value)}
+                            onChange={(e) =>
+                              handleChange(index, "name", e.target.value)
+                            }
                             className="border rounded w-full py-1 px-2"
                           />
                         ) : (
-                          row.studentFirstName + " " +row.studentMiddleName +" " + row.studentLastName
+                          row.studentFirstName +
+                          " " +
+                          row.studentMiddleName +
+                          " " +
+                          row.studentLastName
                         )}
                       </td>
                       <td className="p-2 text-center">
@@ -331,18 +344,26 @@ const AllStudents = () => {
                           <input
                             type="text"
                             value={row.fatherName}
-                            onChange={(e) => handleChange(index, "fatherName", e.target.value)}
+                            onChange={(e) =>
+                              handleChange(index, "fatherName", e.target.value)
+                            }
                             className="border rounded w-full py-1 px-2"
                           />
                         ) : (
-                            row.fatherFirstName + " " +row.fatherMiddleName +" " + row.fatherLastName
+                          row.fatherFirstName +
+                          " " +
+                          row.fatherMiddleName +
+                          " " +
+                          row.fatherLastName
                         )}
                       </td>
                       <td className="p-2 text-center">
                         {row.isEditing ? (
                           <select
                             value={row.gender}
-                            onChange={(e) => handleChange(index, "gender", e.target.value)}
+                            onChange={(e) =>
+                              handleChange(index, "gender", e.target.value)
+                            }
                             className="border rounded w-full py-1 px-2"
                           >
                             <option value="Male">Male</option>
@@ -355,35 +376,37 @@ const AllStudents = () => {
                       </td>
                       <td className="p-2 text-center">
                         {row.isEditing ? (
-                          <input
-                            type="text"
+                          <select
                             value={row.classOfAdmission}
-                            onChange={(e) => handleChange(index, "classOfAdmission", e.target.value)}
+                            onChange={(e) =>
+                              handleChange(
+                                index,
+                                "classOfAdmission",
+                                e.target.value
+                              )
+                            }
                             className="border rounded w-full py-1 px-2"
-                          />
+                          >
+                            {classes.map((c) => (
+                              <option key={c.id} value={c.id}>
+                                {c.name}
+                              </option>
+                            ))}
+                          </select>
                         ) : (
-                          row.classOfAdmission
+                          classes.find((c) => c.id === row.classOfAdmission)
+                            ?.name
                         )}
                       </td>
-                      <td className="p-2 text-center">
-                        {row.isEditing ? (
-                          <input
-                            type="number"
-                            value={index+1}
-                            readOnly
-                            onChange={(e) => handleChange(index, "rollNo", e.target.value)}
-                            className="border rounded w-full py-1 px-2"
-                          />
-                        ) : (
-                          index+1
-                        )}
-                      </td>
+                      <td className="p-2 text-center">{row.id}</td>
                       <td className="p-2 text-center">
                         {row.isEditing ? (
                           <input
                             type="text"
                             value={row.phoneNumber}
-                            onChange={(e) => handleChange(index, "phoneNumber", e.target.value)}
+                            onChange={(e) =>
+                              handleChange(index, "phoneNumber", e.target.value)
+                            }
                             className="border rounded w-full py-1 px-2"
                           />
                         ) : (
@@ -423,44 +446,44 @@ const AllStudents = () => {
                           </>
                         )}
                       </td> */}
-                       <td className="p-2 text-center">
-                    {row.isEditing ? (
-                      // Show Save and Cancel buttons when in edit mode
-                      <div className="flex justify-center items-center">
-                        <button
-                          className="mr-2 p-1 text-black w-8 h-8 flex justify-center items-center  transition-colors duration-300 hover:bg-[#59d66a] "
-                          onClick={() => handleSave(index)}
-                        >
-                          <MdSave className="text-lg" />
-                        </button>
-                        <button
-                          className="p-1 text-black w-8 h-8 flex justify-center items-center transition-colors duration-300 hover:bg-red-500 hover:text-white"
-                          onClick={() => handleCancel(index)}
-                        >
-                          <MdCancel className="text-lg" />
-                        </button>
-                      </div>
-                    ) : (
-                      // Show Eye, Edit, and Delete buttons when not in edit mode
-                      <div className="flex justify-center items-center">
-                        <button className="p-1 mr-2 text-black w-8 h-8 flex justify-center items-center transition-colors duration-300 hover:bg-gray-400">
-                          <FaRegEye className="text-lg" />
-                        </button>
-                        <button
-                          className="mr-2 p-1 text-black w-8 h-8 flex justify-center items-center transition-colors duration-300 hover:bg-blue-400 hover:text-white"
-                          onClick={() => handleEdit(index)}
-                        >
-                          <MdOutlineEdit className="text-lg" />
-                        </button>
-                        <button
-                          className="p-1 text-black w-8 h-8 flex justify-center items-center transition-colors duration-300 hover:bg-red-600 hover:text-white"
-                          onClick={() => handleDelete(index, row.id)}
-                        >
-                          <RiDeleteBin6Line className="hover:text-lg" />
-                        </button>
-                      </div>
-                    )}
-                  </td>
+                      <td className="p-2 text-center">
+                        {row.isEditing ? (
+                          // Show Save and Cancel buttons when in edit mode
+                          <div className="flex justify-center items-center">
+                            <button
+                              className="mr-2 p-1 text-black w-8 h-8 flex justify-center items-center  transition-colors duration-300 hover:bg-[#59d66a] "
+                              onClick={() => handleSave(index)}
+                            >
+                              <MdSave className="text-lg" />
+                            </button>
+                            <button
+                              className="p-1 text-black w-8 h-8 flex justify-center items-center transition-colors duration-300 hover:bg-red-500 hover:text-white"
+                              onClick={() => handleCancel(index)}
+                            >
+                              <MdCancel className="text-lg" />
+                            </button>
+                          </div>
+                        ) : (
+                          // Show Eye, Edit, and Delete buttons when not in edit mode
+                          <div className="flex justify-center items-center">
+                            <button className="p-1 mr-2 text-black w-8 h-8 flex justify-center items-center transition-colors duration-300 hover:bg-gray-400">
+                              <FaRegEye className="text-lg" />
+                            </button>
+                            <button
+                              className="mr-2 p-1 text-black w-8 h-8 flex justify-center items-center transition-colors duration-300 hover:bg-blue-400 hover:text-white"
+                              onClick={() => handleEdit(index)}
+                            >
+                              <MdOutlineEdit className="text-lg" />
+                            </button>
+                            <button
+                              className="p-1 text-black w-8 h-8 flex justify-center items-center transition-colors duration-300 hover:bg-red-600 hover:text-white"
+                              onClick={() => handleDelete(index, row.id)}
+                            >
+                              <RiDeleteBin6Line className="hover:text-lg" />
+                            </button>
+                          </div>
+                        )}
+                      </td>
                     </tr>
                   ))
                 )

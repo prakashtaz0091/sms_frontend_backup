@@ -79,7 +79,7 @@ const FeeReceipt = () => {
                 type="text"
                 value={receiptNo}
                 readOnly
-                className="rounded-3xl p-2 w-full md:w-44 border border-gray-400 bg-slate-100"
+                className="rounded-3xl p-2 w-full md:w-44 border border-gray-400 bg-slate-100 cursor-not-allowed"
               />
             </div>
             <div className="flex flex-col items-center">

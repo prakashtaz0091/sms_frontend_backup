@@ -61,14 +61,16 @@ const StudentAttendanceReport = () => {
 
   const handleNextMonth = () => {
     const now = new Date();
-    const currentMonth = now.getMonth();
-    const validMonth = month <= currentMonth;
+
     const currentYear = now.getFullYear();
     const validYear = year <= currentYear;
-    if (validYear && validMonth) {
+
+    if (validYear) {
       if (month == 12) {
         const newYear = year + 1;
         const newMonth = 1;
+        console.log(newYear, newMonth);
+
         getClassAttendanceByMonth(newYear, newMonth);
         setYear(newYear);
         setMonth(newMonth);
@@ -244,6 +246,8 @@ const StudentAttendanceReport = () => {
               setSelectedDate(date);
               const month = parseInt(date.getMonth() + 1);
               const year = parseInt(date.getFullYear());
+              console.log(year);
+
               setMonth(month);
               setYear(year);
             }}

@@ -5,10 +5,8 @@ import { FiRefreshCcw } from "react-icons/fi";
 import ClassSubjects from "./ClassSubjects";
 import { AuthContext } from "../../../context/AuthContext";
 
-
 const Classes = () => {
-  
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(true);
   const [classList, setClassList] = useState([]);
 
   const [subjectList, setSubjectList] = useState([]);
@@ -21,60 +19,62 @@ const Classes = () => {
   ]);
   const [classes, setClasses] = useState([]);
 
-
-
-
   const { api } = useContext(AuthContext);
-
-
-
-  useEffect(()=>{
-
-
+  const loadClassSubjectsFromServer = async () => {
+    try {
+      const response = await api.get("/get_classes_and_subjects/");
+      setClasses(response.data);
+      localStorage.setItem("classes", JSON.stringify(response.data));
+      // console.log(response.data);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };
+  useEffect(() => {
     const loadClassListFromServer = async () => {
       try {
-        const response = await api.get("/get_classes_for_config/"); 
+        const response = await api.get("/get_classes_for_config/");
         setClassList(response.data);
-        localStorage.setItem("classes_for_config", JSON.stringify(response.data));
-
-
+        localStorage.setItem(
+          "classes_for_config",
+          JSON.stringify(response.data)
+        );
       } catch (error) {
         console.error("Error fetching data:", error);
       }
-    }
-    loadClassListFromServer()
+    };
+    loadClassListFromServer();
 
     const loadSubjectListFromServer = async () => {
       try {
-        const response = await api.get(`/get_subjects_for_config/`); 
+        const response = await api.get(`/get_subjects_for_config/`);
         setSubjectList(response.data);
-        localStorage.setItem("subjects_for_config", JSON.stringify(response.data));
-
-  
+        localStorage.setItem(
+          "subjects_for_config",
+          JSON.stringify(response.data)
+        );
       } catch (error) {
         console.error("Error fetching data:", error);
       }
-    }
+    };
 
-    loadSubjectListFromServer()
-
+    loadSubjectListFromServer();
 
     const loadTeacherListFromServer = async () => {
       try {
-        const response = await api.get("/get_teachers_for_config/"); 
+        const response = await api.get("/get_teachers_for_config/");
         setTeacherList(response.data);
-        localStorage.setItem("teachers_for_config", JSON.stringify(response.data));
-
-
-
+        localStorage.setItem(
+          "teachers_for_config",
+          JSON.stringify(response.data)
+        );
       } catch (error) {
         console.error("Error fetching data:", error);
       }
-    }
-    loadTeacherListFromServer()
+    };
+    loadTeacherListFromServer();
 
-    setLoading(false)
-
+    setLoading(false);
 
     // const loadClasses=() => {
     //   const savedClasses = localStorage.getItem("classes");
@@ -82,20 +82,8 @@ const Classes = () => {
     // }
     // setClasses(loadClasses())
 
-
-    const loadClassSubjectsFromServer = async () => {
-      try {
-        const response = await api.get("/get_classes_and_subjects/");
-        setClasses(response.data);
-        localStorage.setItem("classes", JSON.stringify(response.data));
-        // console.log(response.data);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
-    }
-    loadClassSubjectsFromServer()
-
-  },[api])
+    loadClassSubjectsFromServer();
+  }, [api]);
   //const [updated,setUpdated]=useState(false)
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -112,9 +100,8 @@ const Classes = () => {
 
   const handleAssign = () => {
     // console.log(selectedClassId, assignedSubjects);
-    
-    if (selectedClassId && assignedSubjects.length > 0) {
 
+    if (selectedClassId && assignedSubjects.length > 0) {
       //sending to server
       const sendToServer = async () => {
         try {
@@ -123,29 +110,27 @@ const Classes = () => {
             subjects: assignedSubjects,
           });
           // console.log(response.data);
-          updateUI()
-        } catch (error) { 
-          console.error("Error fetching data:", error);
-          alert(error.response.data.error[0])
+          updateUI();
+          // loadClassSubjectsFromServer();
+        } catch (error) {
+          alert(error.response.data.error);
         }
-      }
+      };
 
-      sendToServer()
-
-
+      sendToServer();
       const updateUI = () => {
         const classExists = classes.some(
           (cls) => cls.id === parseInt(selectedClassId)
         );
-  
-  
-  
+        // console.log(classExists);
+
         if (classExists) {
           const updatedClasses = classes.map((cls) =>
             cls.id === parseInt(selectedClassId)
               ? { ...cls, subjects: [...cls.subjects, ...assignedSubjects] }
               : cls
           );
+
           setClasses(updatedClasses);
         } else {
           const selectedClassName = classList.find(
@@ -160,12 +145,10 @@ const Classes = () => {
             },
           ]);
         }
-  
+
         setSelectedClassId("");
         setAssignedSubjects([{ subjectId: "", teacherId: "" }]);
-      }
-
-      
+      };
     }
   };
 
@@ -199,7 +182,9 @@ const Classes = () => {
     );
   };
 
-  return loading ? "Loading..." : (
+  return loading ? (
+    "Loading..."
+  ) : (
     <div className="p-8 bg-pink-100 min-h-screen">
       {/* Header */}
       <div className="flex gap-4 bg-white rounded-3xl p-2">
@@ -227,7 +212,7 @@ const Classes = () => {
             <select
               value={selectedClassId}
               onChange={(e) => {
-                setSelectedClassId(e.target.value)
+                setSelectedClassId(e.target.value);
               }}
               className="p-3 px-4 mb-4 rounded-3xl bg-white border border-blue-500 w-96"
             >
@@ -239,7 +224,6 @@ const Classes = () => {
                   {cls.name}
                 </option>
               ))}
-              
             </select>
 
             {assignedSubjects.map((item, index) => (
@@ -334,12 +318,7 @@ const Classes = () => {
             </div>
           </div>
           {/* <ClassSubjects classes={classes} onUpdate={handleUpdateSubjects} /> */}
-          <ClassSubjects
-            classes={classes}
-
-            
-          />
-          
+          <ClassSubjects classes={classes} />
         </div>
       </div>
     </div>

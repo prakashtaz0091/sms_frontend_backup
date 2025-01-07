@@ -5,14 +5,14 @@ import { Formik, Form, Field, ErrorMessage } from "formik";
 import { formValidationSchema } from "./EmpValidations";
 // import DistrictStates from "./DistrictStates";
 import statesDistricts from "../SignUp&SignIn/statesDistricts.json";
-import {AuthContext} from "../../../context/AuthContext"
+import { AuthContext } from "../../../context/AuthContext";
 
 function AddEmployee() {
   // Select complimentry logic
   const [selectedOptions, setSelectedOptions] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
   // const [district, SetDistrict] = useState("district");
-  const {api} = useContext(AuthContext)
+  const { api } = useContext(AuthContext);
 
   const options = ["Python", "C++", "DSA"];
 
@@ -120,9 +120,9 @@ function AddEmployee() {
   };
 
   const handleSubmit = async (values, { resetForm }) => {
-    // Log the form values
-    console.log("Form Submitted successfully");
-    console.log("Form Data", values);
+    // // Log the form values
+    // console.log("Form Submitted successfully");
+    // console.log("Form Data", values);
 
     // Reset the form after successful submission
     resetForm();
@@ -134,7 +134,6 @@ function AddEmployee() {
       fileInputRef2.current.value = null; // Reset the file input field
     }
 
-
     // Clear the file name and any errors
     setFileName1("");
     setFileSizeError("");
@@ -143,24 +142,19 @@ function AddEmployee() {
 
     let FORMDATA = new FormData();
     for (const key in values) {
-      FORMDATA.append(key, values[key]);        
-      
+      FORMDATA.append(key, values[key]);
     }
     // console.log(values, FORMDATA);
-    
 
     try {
       // Make the API call to update the student
       const response = await api.post(`/employee/`, FORMDATA);
       // console.log(response.data);
-      
-      
+      alert("Employee added successfully!");
     } catch (error) {
       console.error("Failed ", error.response);
       // Handle error (e.g., show a notification)
     }
-
-    
   };
 
   function getStates(jsonData) {
@@ -179,9 +173,6 @@ function AddEmployee() {
 
   const [cstates, setcStates] = useState(getStates(statesDistricts));
   const [cdistricts, setcDistricts] = useState([]);
-
-
-
 
   return (
     <div className="bg-pink-100 min-h-screen p-8">
@@ -207,7 +198,7 @@ function AddEmployee() {
         onSubmit={handleSubmit}
         validateOnChange={true}
       >
-        {({ setFieldValue, values, setValues , resetForm }) => (
+        {({ setFieldValue, values, setValues, resetForm }) => (
           <Form className=" ">
             <div className="my-8 text-center">
               <h2 className="text-3xl font-bold text-black">Employee Form</h2>
@@ -679,43 +670,40 @@ function AddEmployee() {
                     className="mr-2 h-4 w-4 text-indigo-600 border-gray-300 rounded-3xl"
                     onChange={(e) => {
                       const isChecked = e.target.checked;
-                      
-                    
-                    if (isChecked) {
-                      // Batch update current address fields using setValues
-                       const selectedState = values.state;
-                      const filteredDistricts = getDistrictsByState(
-                        statesDistricts,
-                        selectedState
-                      );
-                     
-                      setcDistricts(filteredDistricts); // Update districts for the selected state
-                      setValues({
-                        ...values,
-                        sameAsPermanentAddress: true,
-                        currentAddress1: values.address1,
-                        currentTownVillageCity: values.townVillageCity,
-                        currentCountry: values.country,
-                        currentState: values.state,
-                        currentDistrict: values.district,
-                        currentZipCode: values.zipCode,
-                      });
-                    } else {
-                      // Clear current address fields
-                      setValues({
-                        ...values,
-                        sameAsPermanentAddress: false,
-                        currentAddress1: '',
-                        currentTownVillageCity: '',
-                        currentState: '',
-                        currentDistrict: '',
-                        currentCountry: '',
-                        currentZipCode: '',
-                      });
-                    }
 
-                  }}
-                    
+                      if (isChecked) {
+                        // Batch update current address fields using setValues
+                        const selectedState = values.state;
+                        const filteredDistricts = getDistrictsByState(
+                          statesDistricts,
+                          selectedState
+                        );
+
+                        setcDistricts(filteredDistricts); // Update districts for the selected state
+                        setValues({
+                          ...values,
+                          sameAsPermanentAddress: true,
+                          currentAddress1: values.address1,
+                          currentTownVillageCity: values.townVillageCity,
+                          currentCountry: values.country,
+                          currentState: values.state,
+                          currentDistrict: values.district,
+                          currentZipCode: values.zipCode,
+                        });
+                      } else {
+                        // Clear current address fields
+                        setValues({
+                          ...values,
+                          sameAsPermanentAddress: false,
+                          currentAddress1: "",
+                          currentTownVillageCity: "",
+                          currentState: "",
+                          currentDistrict: "",
+                          currentCountry: "",
+                          currentZipCode: "",
+                        });
+                      }
+                    }}
                   />
 
                   <label className="text-sm">Same as Permanent Address</label>
@@ -776,8 +764,7 @@ function AddEmployee() {
                       setFieldValue("currentState", selectedState); // Update state in Formik
                       setFieldValue("currentDistrict", ""); // Clear district when state changes
                       setcDistricts(filteredDistricts); // Update districts for the selected state
-                      console.log("changed state"); 
-                      
+                      console.log("changed state");
                     }}
                   >
                     <option value="" disabled selected>
@@ -799,12 +786,11 @@ function AddEmployee() {
                     as="select"
                     name="currentDistrict"
                     className="mt-1 block w-full p-2 bg-white border border-gray-300 rounded-3xl"
-                    
                   >
                     <option value="" disabled selected>
                       District
                     </option>
-                   {cdistricts.map((district, index) => (
+                    {cdistricts.map((district, index) => (
                       <option key={index} value={district}>
                         {district}
                       </option>
@@ -1109,6 +1095,3 @@ function AddEmployee() {
 }
 
 export default AddEmployee;
-
-
-
