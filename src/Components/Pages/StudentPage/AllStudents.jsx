@@ -20,16 +20,48 @@ const AllStudents = () => {
   const [originalRows, setOriginalRows] = useState([]); // Store original data before editing
   const [classes, setClasses] = useState([]);
 
+  const [pagination, setPagination] = useState({
+    currentPage: 1,
+    recordsPerPage: 10,
+    totalRecords: 0,
+    totalPages: 1,
+  });
+
   const { api } = useContext(AuthContext);
+
+  const applyPagination = () => {
+    let startIndex =
+      pagination.totalRecords == 0
+        ? 0
+        : pagination.currentPage * pagination.recordsPerPage -
+          pagination.recordsPerPage;
+    let endIndex =
+      pagination.currentPage * pagination.recordsPerPage >
+      pagination.totalRecords
+        ? pagination.totalRecords
+        : pagination.currentPage * pagination.recordsPerPage;
+
+    setFilteredRows(rows.slice(startIndex, endIndex));
+  };
+
+  useEffect(() => {
+    applyPagination();
+  }, [rows, pagination]);
 
   // Load data from API
   useEffect(() => {
     const fetchData = async () => {
       try {
         const response = await api.get("/student/");
-        console.log(response.data);
+        // console.log(response.data);
         setRows(response.data);
-        setFilteredRows(response.data);
+        setPagination({
+          ...pagination,
+          totalRecords: response.data.length,
+          totalPages: Math.ceil(
+            response.data.length / pagination.recordsPerPage
+          ),
+        });
         setOriginalRows(response.data);
         setIsLoading(false);
       } catch (error) {
@@ -99,6 +131,22 @@ const AllStudents = () => {
   const handleRefresh = () => {
     setFilteredRows(rows);
     setSearchTerm("");
+    setPagination({
+      ...pagination,
+      currentPage: 1,
+      recordsPerPage: 10,
+    });
+  };
+
+  const setRecordsPerPage = (recordsPerPage) => {
+    setPagination((prevPagination) => ({
+      ...prevPagination,
+      recordsPerPage: parseInt(recordsPerPage),
+      currentPage: 1,
+      totalPages: Math.ceil(
+        prevPagination.totalRecords / parseInt(recordsPerPage)
+      ),
+    }));
   };
 
   const handleDelete = async (index, studentId) => {
@@ -413,39 +461,7 @@ const AllStudents = () => {
                           row.phoneNumber
                         )}
                       </td>
-                      {/* <td className="p-2 text-center flex justify-center gap-2">
-                        {row.isEditing ? (
-                          <>
-                            <button
-                              onClick={() => handleSave(index)}
-                              className="text-green-600"
-                            >
-                              <MdSave />
-                            </button>
-                            <button
-                              onClick={() => handleCancel(index)}
-                              className="text-red-600"
-                            >
-                              <MdCancel />
-                            </button>
-                          </>
-                        ) : (
-                          <>
-                            <button
-                              onClick={() => handleEdit(index)}
-                              className="text-blue-600"
-                            >
-                              <MdOutlineEdit />
-                            </button>
-                            <button
-                              onClick={() => handleDelete(index)}
-                              className="text-red-600"
-                            >
-                              <RiDeleteBin6Line />
-                            </button>
-                          </>
-                        )}
-                      </td> */}
+
                       <td className="p-2 text-center">
                         {row.isEditing ? (
                           // Show Save and Cancel buttons when in edit mode
@@ -496,6 +512,91 @@ const AllStudents = () => {
               )}
             </tbody>
           </table>
+        </div>
+
+        {/* pagination  */}
+        <div className="mt-4 flex justify-between items-center pb-10">
+          <div className="flex space-x-2 items-center">
+            <button
+              className={
+                pagination.recordsPerPage == 10
+                  ? "bg-[#BCA8EA] text-white px-3 py-2 border border-gray-400 rounded-full "
+                  : "px-3 py-2 border border-gray-400 rounded-full "
+              }
+              value="10"
+              onClick={(e) => setRecordsPerPage(e.currentTarget.value)}
+            >
+              10
+            </button>
+            <button
+              className={
+                pagination.recordsPerPage == 25
+                  ? "bg-[#BCA8EA] text-white px-3 py-2 border border-gray-400 rounded-full "
+                  : "px-3 py-2 border border-gray-400 rounded-full "
+              }
+              value="25"
+              onClick={(e) => setRecordsPerPage(e.currentTarget.value)}
+            >
+              25
+            </button>
+            <button
+              className={
+                pagination.recordsPerPage == 50
+                  ? "bg-[#BCA8EA] text-white px-3 py-2 border border-gray-400 rounded-full "
+                  : "px-3 py-2 border border-gray-400 rounded-full "
+              }
+              value="50"
+              onClick={(e) => setRecordsPerPage(e.currentTarget.value)}
+            >
+              50
+            </button>
+            <p>Records per page </p>
+          </div>
+          <div className="flex flex-row items-center">
+            <div className="text-sm text-gray-600 ">
+              Showing{" "}
+              {pagination.totalRecords == 0
+                ? 0
+                : pagination.currentPage * pagination.recordsPerPage -
+                  (pagination.recordsPerPage - 1)}{" "}
+              &nbsp; to &nbsp;
+              {pagination.currentPage * pagination.recordsPerPage >
+              pagination.totalRecords
+                ? pagination.totalRecords
+                : pagination.currentPage * pagination.recordsPerPage}{" "}
+              &nbsp; of {pagination.totalRecords} records
+            </div>
+            <div className="flex space-x-2 items-center">
+              <button
+                className="px-3  "
+                onClick={() =>
+                  pagination.currentPage > 1 &&
+                  setPagination({
+                    ...pagination,
+                    currentPage: pagination.currentPage - 1,
+                  })
+                }
+              >
+                <IoIosArrowDropleft size={30} />
+              </button>
+              <p className="border border-gray-700 px-2 rounded-full">
+                {" "}
+                {pagination.currentPage}
+              </p>
+              <button
+                className="px-3 "
+                onClick={() =>
+                  pagination.currentPage < pagination.totalPages &&
+                  setPagination({
+                    ...pagination,
+                    currentPage: pagination.currentPage + 1,
+                  })
+                }
+              >
+                <IoIosArrowDropright size={30} />
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </>

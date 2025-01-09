@@ -7,16 +7,48 @@ import { AuthContext } from "../../../../context/AuthContext";
 import { sub } from "date-fns";
 
 const ClsResSearch = () => {
-  const [currentPage, setCurrentPage] = useState(1);
-  const [recordsPerPage, setRecordsPerPage] = useState(10);
-
   const navigate = useNavigate();
 
   const { api } = useContext(AuthContext);
   const [headers, setHeaders] = useState([]);
   const classResultInfo = JSON.parse(localStorage.getItem("class_result_info"));
   // Data for each student
+  const [initialData, setInitialData] = useState([]);
   const [data, setData] = useState([]);
+  const [pagination, setPagination] = useState({
+    currentPage: 1,
+    recordsPerPage: 10,
+    totalRecords: 0,
+    totalPages: 1,
+  });
+
+  const applyPagination = () => {
+    let startIndex =
+      pagination.totalRecords == 0
+        ? 0
+        : pagination.currentPage * pagination.recordsPerPage -
+          pagination.recordsPerPage;
+    let endIndex =
+      pagination.currentPage * pagination.recordsPerPage >
+      pagination.totalRecords
+        ? pagination.totalRecords
+        : pagination.currentPage * pagination.recordsPerPage;
+
+    setData(initialData.slice(startIndex, endIndex));
+  };
+  useEffect(() => {
+    applyPagination();
+  }, [pagination]);
+  const setRecordsPerPage = (recordsPerPage) => {
+    setPagination((prevPagination) => ({
+      ...prevPagination,
+      recordsPerPage: parseInt(recordsPerPage),
+      currentPage: 1,
+      totalPages: Math.ceil(
+        prevPagination.totalRecords / parseInt(recordsPerPage)
+      ),
+    }));
+  };
 
   useEffect(() => {
     const getMarks = async () => {
@@ -24,7 +56,7 @@ const ClsResSearch = () => {
         const response = await api.get(
           `/get_marks/${classResultInfo.exam_id}/${classResultInfo.class_id}/`
         );
-        console.log(response.data);
+        // console.log(response.data);
 
         //set headers
         //prepare headers
@@ -42,7 +74,13 @@ const ClsResSearch = () => {
           studentName: student.student_name,
           marks: student.marks,
         }));
-        setData(tempData);
+        // setData(tempData);
+        setInitialData(tempData);
+        setPagination({
+          ...pagination,
+          totalRecords: tempData.length,
+          totalPages: Math.ceil(tempData.length / pagination.recordsPerPage),
+        });
       } catch (error) {
         console.error("Error fetching marks:", error);
       }
@@ -50,12 +88,6 @@ const ClsResSearch = () => {
 
     getMarks();
   }, [api]);
-
-  const totalPages = Math.ceil(data.length / recordsPerPage);
-
-  const indexOfLastRecord = currentPage * recordsPerPage;
-  const indexOfFirstRecord = indexOfLastRecord - recordsPerPage;
-  const currentRecords = data.slice(indexOfFirstRecord, indexOfLastRecord);
 
   // Handle click on eye icon to navigate to the individual result page
   const handleResultClick = (studentData) => {
@@ -67,12 +99,6 @@ const ClsResSearch = () => {
       })
     );
     navigate("/exam/studentResult"); // Navigate to the edit page
-  };
-
-  const paginate = (pageNumber) => setCurrentPage(pageNumber);
-  const changeRecordsPerPage = (e) => {
-    setRecordsPerPage(Number(e.target.value));
-    setCurrentPage(1);
   };
 
   return (
@@ -114,7 +140,7 @@ const ClsResSearch = () => {
             </tr>
           </thead>
           <tbody>
-            {currentRecords.map((record, index) => (
+            {data.map((record, index) => (
               <tr
                 key={index}
                 className={index % 2 ? "bg-[#BCA8EA]" : "bg-[#E3D6FF]"}
@@ -137,55 +163,90 @@ const ClsResSearch = () => {
           </tbody>
         </table>
       </div>
-      {/* Pagination
-      <div className="flex justify-between items-center mt-4">
-        <div className="flex items-center space-x-2">
-          {[10, 25, 50].map((size) => (
-            <button
-              key={size}
-              onClick={() => setRecordsPerPage(size)}
-              className={`p-2 px-3 rounded-full ${
-                recordsPerPage === size
-                  ? "bg-purple-700 text-white"
-                  : "bg-white text-purple-700 border border-purple-700"
-              }`}
-            >
-              {size}
-            </button>
-          ))}
-          <span className="text-sm">Records per page</span>
+      {/* Pagination Controls */}
+      <div className="mt-4 flex justify-between items-center pb-10">
+        <div className="flex space-x-2 items-center">
+          <button
+            className={
+              pagination.recordsPerPage == 10
+                ? "bg-[#BCA8EA] text-white px-3 py-2 border border-gray-400 rounded-full "
+                : "px-3 py-2 border border-gray-400 rounded-full "
+            }
+            value="10"
+            onClick={(e) => setRecordsPerPage(e.currentTarget.value)}
+          >
+            10
+          </button>
+          <button
+            className={
+              pagination.recordsPerPage == 25
+                ? "bg-[#BCA8EA] text-white px-3 py-2 border border-gray-400 rounded-full "
+                : "px-3 py-2 border border-gray-400 rounded-full "
+            }
+            value="25"
+            onClick={(e) => setRecordsPerPage(e.currentTarget.value)}
+          >
+            25
+          </button>
+          <button
+            className={
+              pagination.recordsPerPage == 50
+                ? "bg-[#BCA8EA] text-white px-3 py-2 border border-gray-400 rounded-full "
+                : "px-3 py-2 border border-gray-400 rounded-full "
+            }
+            value="50"
+            onClick={(e) => setRecordsPerPage(e.currentTarget.value)}
+          >
+            50
+          </button>
+          <p>Records per page </p>
         </div>
-
-        <div className="flex items-center space-x-2">
-          <span className="text-sm">
-            Showing {indexOfFirstRecord + 1} to{" "}
-            {Math.min(indexOfLastRecord, data.length)} of {data.length} records
-          </span>
-          <div className="flex space-x-1 items-center">
+        <div className="flex flex-row items-center">
+          <div className="text-sm text-gray-600 ">
+            Showing{" "}
+            {pagination.totalRecords == 0
+              ? 0
+              : pagination.currentPage * pagination.recordsPerPage -
+                (pagination.recordsPerPage - 1)}{" "}
+            &nbsp; to &nbsp;
+            {pagination.currentPage * pagination.recordsPerPage >
+            pagination.totalRecords
+              ? pagination.totalRecords
+              : pagination.currentPage * pagination.recordsPerPage}{" "}
+            &nbsp; of {pagination.totalRecords} records
+          </div>
+          <div className="flex space-x-2 items-center">
             <button
-              onClick={() => paginate(currentPage - 1)}
-              disabled={currentPage === 1}
-              className={`p-1 rounded-full ${
-                currentPage === 1 ? "text-gray-400" : "text-purple-700"
-              }`}
+              className="px-3  "
+              onClick={() =>
+                pagination.currentPage > 1 &&
+                setPagination({
+                  ...pagination,
+                  currentPage: pagination.currentPage - 1,
+                })
+              }
             >
-              <IoIosArrowDropleft size={40} />
+              <IoIosArrowDropleft size={30} />
             </button>
-            <p className="border border-gray-400 px-3 py-1 rounded-full">
-              {currentPage}
+            <p className="border border-gray-700 px-2 rounded-full">
+              {" "}
+              {pagination.currentPage}
             </p>
             <button
-              onClick={() => paginate(currentPage + 1)}
-              disabled={currentPage === totalPages}
-              className={`p-1 rounded-full ${
-                currentPage === totalPages ? "text-gray-400" : "text-purple-700"
-              }`}
+              className="px-3 "
+              onClick={() =>
+                pagination.currentPage < pagination.totalPages &&
+                setPagination({
+                  ...pagination,
+                  currentPage: pagination.currentPage + 1,
+                })
+              }
             >
-              <IoIosArrowDropright size={40} />
+              <IoIosArrowDropright size={30} />
             </button>
           </div>
         </div>
-      </div> */}
+      </div>
     </div>
   );
 };

@@ -15,8 +15,43 @@ const AddWholeClsData = () => {
     localStorage.getItem("get_exams_classes_id")
   );
 
+  const [intialData, setInitialData] = useState([]);
   const [data, setData] = useState([]);
   let [headers, setHeaders] = useState([]);
+
+  const [pagination, setPagination] = useState({
+    currentPage: 1,
+    recordsPerPage: 10,
+    totalRecords: 0,
+    totalPages: 1,
+  });
+  const applyPagination = () => {
+    let startIndex =
+      pagination.totalRecords == 0
+        ? 0
+        : pagination.currentPage * pagination.recordsPerPage -
+          pagination.recordsPerPage;
+    let endIndex =
+      pagination.currentPage * pagination.recordsPerPage >
+      pagination.totalRecords
+        ? pagination.totalRecords
+        : pagination.currentPage * pagination.recordsPerPage;
+
+    setData(intialData.slice(startIndex, endIndex));
+  };
+  useEffect(() => {
+    applyPagination();
+  }, [pagination]);
+  const setRecordsPerPage = (recordsPerPage) => {
+    setPagination((prevPagination) => ({
+      ...prevPagination,
+      recordsPerPage: parseInt(recordsPerPage),
+      currentPage: 1,
+      totalPages: Math.ceil(
+        prevPagination.totalRecords / parseInt(recordsPerPage)
+      ),
+    }));
+  };
 
   useEffect(() => {
     const getSubjectsForHeadersOfExam = async () => {
@@ -44,8 +79,15 @@ const AddWholeClsData = () => {
           `/get_students_for_marks_entry/${selected_exam_id}/${selected_class.class_id}/`
         );
         // console.log(response.data);
-        setData(response.data);
-        // setStudents(response.data);
+        // setData(response.data);
+        setInitialData(response.data);
+        setPagination({
+          ...pagination,
+          totalRecords: response.data.length,
+          totalPages: Math.ceil(
+            response.data.length / pagination.recordsPerPage
+          ),
+        });
       } catch (error) {
         console.error("Error fetching students:", error);
       }
@@ -113,171 +155,205 @@ const AddWholeClsData = () => {
       <p className="flex items-center justify-center font-bold pt-10 text-2xl pb-6">
         Insert Obtained Marks ({selected_class.class_name})
       </p>
-      <div className="w-screen">
-        <div className=" bg-white py-4  rounded-lg shadow-lg">
-          <div className="overflow-x-auto">
-            <div className="max-h-[400px] overflow-y-auto ">
-              <table className=" text-center border-collapse">
-                <thead className="sticky top-0">
-                  <tr className="bg-white">
-                    {headers.map((header, index) => (
-                      <th
-                        key={index}
-                        className="p-2 whitespace-nowrap min-w-[150px]"
-                      >
-                        {header}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody className="">
-                  {data.map((student, index) => (
-                    <tr
+      {/* <div className="w-screen"> */}
+      <div className=" bg-white py-4  rounded-lg shadow-lg">
+        <div className="overflow-x-auto">
+          <div className=" overflow-y-auto ">
+            <table className=" text-center border-collapse">
+              <thead className="sticky top-0">
+                <tr className="bg-white">
+                  {headers.map((header, index) => (
+                    <th
                       key={index}
-                      className={index % 2 ? "bg-[#BCA8EA]" : "bg-[#E3D6FF]"}
+                      className="p-2 whitespace-nowrap min-w-[150px]"
                     >
-                      <td className="p-2 min-w-[150px]">{student.enr_no}</td>
-                      <td className="p-2 min-w-[250px]">
-                        {student.student_name}
-                      </td>
-                      <td className="p-2 min-w-[250px]">
-                        {student.father_name}
-                      </td>
-                      {/* <td className="p-2 min-w-[30px]">{record.rollNo}</td> */}
-                      {student.marks.map((subject, i) => (
-                        <td
-                          key={i}
-                          className={`p-2 ${
-                            editingIndex === index
-                              ? "min-w-[50px]"
-                              : "min-w-[50px]"
-                          }`}
-                          style={i > 2 ? { whiteSpace: "nowrap" } : {}}
-                        >
-                          {editingIndex === index ? (
-                            <input
-                              type="number"
-                              value={subject.marks}
-                              onChange={(e) => {
-                                if (e.target.value > subject.paper_full_marks) {
-                                  alert(
-                                    `Marks cannot be greater than full marks i.e. ${subject.paper_full_marks}`
-                                  );
-                                } else if (e.target.value < 0) {
-                                  alert("Marks cannot be negative");
-                                } else {
-                                  const updatedMarks = data.map(
-                                    (studentData) => {
-                                      if (
-                                        studentData.student_id ===
-                                        student.student_id
-                                      ) {
-                                        // Replace 'studentId' with the actual ID of the student being updated
-                                        return {
-                                          ...studentData,
-                                          marks: studentData.marks.map(
-                                            (subjectData) => {
-                                              if (
-                                                subjectData.paper_id ===
-                                                subject.paper_id
-                                              ) {
-                                                // Replace 'subjectId' with the actual ID of the subject being updated
-                                                return {
-                                                  ...subjectData,
-                                                  marks: e.target.value,
-                                                };
-                                              }
-                                              return subjectData;
-                                            }
-                                          ),
-                                        };
-                                      }
-                                      return studentData;
-                                    }
-                                  );
-
-                                  setData(updatedMarks);
-                                } // Assuming setData is the state setter function
-                              }}
-                              className="w-14 rounded-full pl-1"
-                            />
-                          ) : (
-                            subject.marks
-                          )}
-                        </td>
-                      ))}
-                      <td className="p-2 min-w-[200px]">
+                      {header}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody className="">
+                {data.map((student, index) => (
+                  <tr
+                    key={index}
+                    className={index % 2 ? "bg-[#BCA8EA]" : "bg-[#E3D6FF]"}
+                  >
+                    <td className="p-2 min-w-[150px]">{student.enr_no}</td>
+                    <td className="p-2 min-w-[250px]">
+                      {student.student_name}
+                    </td>
+                    <td className="p-2 min-w-[250px]">{student.father_name}</td>
+                    {/* <td className="p-2 min-w-[30px]">{record.rollNo}</td> */}
+                    {student.marks.map((subject, i) => (
+                      <td
+                        key={i}
+                        className={`p-2 ${
+                          editingIndex === index
+                            ? "min-w-[50px]"
+                            : "min-w-[50px]"
+                        }`}
+                        style={i > 2 ? { whiteSpace: "nowrap" } : {}}
+                      >
                         {editingIndex === index ? (
-                          <button
-                            onClick={() => handleSaveClick(index)}
-                            className="bg-green-500 text-white px-4 py-2 rounded"
-                          >
-                            Save
-                          </button>
+                          <input
+                            type="number"
+                            value={subject.marks}
+                            onChange={(e) => {
+                              if (e.target.value > subject.paper_full_marks) {
+                                alert(
+                                  `Marks cannot be greater than full marks i.e. ${subject.paper_full_marks}`
+                                );
+                              } else if (e.target.value < 0) {
+                                alert("Marks cannot be negative");
+                              } else {
+                                const updatedMarks = data.map((studentData) => {
+                                  if (
+                                    studentData.student_id ===
+                                    student.student_id
+                                  ) {
+                                    // Replace 'studentId' with the actual ID of the student being updated
+                                    return {
+                                      ...studentData,
+                                      marks: studentData.marks.map(
+                                        (subjectData) => {
+                                          if (
+                                            subjectData.paper_id ===
+                                            subject.paper_id
+                                          ) {
+                                            // Replace 'subjectId' with the actual ID of the subject being updated
+                                            return {
+                                              ...subjectData,
+                                              marks: e.target.value,
+                                            };
+                                          }
+                                          return subjectData;
+                                        }
+                                      ),
+                                    };
+                                  }
+                                  return studentData;
+                                });
+
+                                setData(updatedMarks);
+                              } // Assuming setData is the state setter function
+                            }}
+                            className="w-14 rounded-full pl-1"
+                          />
                         ) : (
-                          <button
-                            onClick={() => handleEditClick(index)}
-                            className="bg-blue-500 text-white px-4 py-2 rounded"
-                          >
-                            Edit
-                          </button>
+                          subject.marks
                         )}
                       </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                    ))}
+                    <td className="p-2 min-w-[200px]">
+                      {editingIndex === index ? (
+                        <button
+                          onClick={() => handleSaveClick(index)}
+                          className="bg-green-500 text-white px-4 py-2 rounded"
+                        >
+                          Save
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => handleEditClick(index)}
+                          className="bg-blue-500 text-white px-4 py-2 rounded"
+                        >
+                          Edit
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
+      {/* </div> */}
 
-      {/* Pagination
-      <div className="flex justify-between items-center mt-4 pl-2">
-        <div className="flex items-center space-x-2">
-          {[10, 25, 50].map((size) => (
-            <button
-              key={size}
-              onClick={() => setRecordsPerPage(size)}
-              className="p-2 px-3 rounded-full border border-gray-300"
-            >
-              {size}
-            </button>
-          ))}
-          <span className="text-sm">Records per page</span>
+      {/* Pagination Controls */}
+      <div className="mt-4 flex justify-between items-center pb-10">
+        <div className="flex space-x-2 items-center">
+          <button
+            className={
+              pagination.recordsPerPage == 10
+                ? "bg-[#BCA8EA] text-white px-3 py-2 border border-gray-400 rounded-full "
+                : "px-3 py-2 border border-gray-400 rounded-full "
+            }
+            value="10"
+            onClick={(e) => setRecordsPerPage(e.currentTarget.value)}
+          >
+            10
+          </button>
+          <button
+            className={
+              pagination.recordsPerPage == 25
+                ? "bg-[#BCA8EA] text-white px-3 py-2 border border-gray-400 rounded-full "
+                : "px-3 py-2 border border-gray-400 rounded-full "
+            }
+            value="25"
+            onClick={(e) => setRecordsPerPage(e.currentTarget.value)}
+          >
+            25
+          </button>
+          <button
+            className={
+              pagination.recordsPerPage == 50
+                ? "bg-[#BCA8EA] text-white px-3 py-2 border border-gray-400 rounded-full "
+                : "px-3 py-2 border border-gray-400 rounded-full "
+            }
+            value="50"
+            onClick={(e) => setRecordsPerPage(e.currentTarget.value)}
+          >
+            50
+          </button>
+          <p>Records per page </p>
         </div>
-
-        <div className="flex space-x-1 items-center pr-2">
-          <p>Showing 1 to 10 of 15 records</p>
-          <button
-            onClick={() => paginate(currentPage - 1)}
-            disabled={currentPage === 1}
-            className="p-1 rounded-full border border-gray-300"
-          >
-            <MdChevronLeft size={24} />
-          </button>
-          <p className="border border-gray-400 px-3 py-1 rounded-full">
-            {currentPage}
-          </p>
-          <button
-            onClick={() => paginate(currentPage + 1)}
-            disabled={currentPage === totalPages}
-            className="p-1 rounded-full border border-gray-300"
-          >
-            <MdChevronRight size={24} />
-          </button>
+        <div className="flex flex-row items-center">
+          <div className="text-sm text-gray-600 ">
+            Showing{" "}
+            {pagination.totalRecords == 0
+              ? 0
+              : pagination.currentPage * pagination.recordsPerPage -
+                (pagination.recordsPerPage - 1)}{" "}
+            &nbsp; to &nbsp;
+            {pagination.currentPage * pagination.recordsPerPage >
+            pagination.totalRecords
+              ? pagination.totalRecords
+              : pagination.currentPage * pagination.recordsPerPage}{" "}
+            &nbsp; of {pagination.totalRecords} records
+          </div>
+          <div className="flex space-x-2 items-center">
+            <button
+              className="px-3  "
+              onClick={() =>
+                pagination.currentPage > 1 &&
+                setPagination({
+                  ...pagination,
+                  currentPage: pagination.currentPage - 1,
+                })
+              }
+            >
+              <IoIosArrowDropleft size={30} />
+            </button>
+            <p className="border border-gray-700 px-2 rounded-full">
+              {" "}
+              {pagination.currentPage}
+            </p>
+            <button
+              className="px-3 "
+              onClick={() =>
+                pagination.currentPage < pagination.totalPages &&
+                setPagination({
+                  ...pagination,
+                  currentPage: pagination.currentPage + 1,
+                })
+              }
+            >
+              <IoIosArrowDropright size={30} />
+            </button>
+          </div>
         </div>
       </div>
-      */}
-      {/* <div className="flex justify-center pt-10">
-        <button
-          type="submit"
-          className="bg-pink-500 p-2 px-6 rounded-full"
-          onClick={handleSubmit}
-        >
-          Submit
-        </button>
-      </div> */}
     </div>
   );
 };
