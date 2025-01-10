@@ -10,8 +10,10 @@ import { IoFilterSharp } from "react-icons/io5";
 import { MdSave, MdCancel } from "react-icons/md";
 import { AuthContext } from "../../../context/AuthContext";
 import { set } from "date-fns";
+import { useNavigate } from "react-router-dom";
 
 const AllEmployee = () => {
+  const navigate = useNavigate();
   const { api } = useContext(AuthContext);
 
   const [showFilterOptions, setShowFilterOptions] = useState(false);
@@ -327,6 +329,13 @@ const AllEmployee = () => {
     setFilteredRows(newRows);
   };
 
+  const handleView = (employeeId) => {
+    // navigate to view page
+    console.log(employeeId);
+
+    navigate("/employees/view", { state: { employeeId } });
+  };
+
   return (
     <div className="p-8 bg-pink-100 min-h-screen">
       <div className="flex gap-4  bg-white  rounded-3xl p-2 ">
@@ -590,7 +599,10 @@ const AllEmployee = () => {
                       ) : (
                         // Show Eye, Edit, and Delete buttons when not in edit mode
                         <div className="flex justify-center items-center">
-                          <button className="p-1 mr-2 text-black w-8 h-8 flex justify-center items-center transition-colors duration-300 hover:bg-gray-400">
+                          <button
+                            className="p-1 mr-2 text-black w-8 h-8 flex justify-center items-center transition-colors duration-300 hover:bg-gray-400"
+                            onClick={() => handleView(row.id)}
+                          >
                             <FaRegEye className="text-lg" />
                           </button>
                           <button

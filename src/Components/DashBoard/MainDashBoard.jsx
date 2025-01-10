@@ -1,5 +1,10 @@
-import React, {useContext} from "react";
-import { BrowserRouter as Router, Route, Routes, useNavigate } from "react-router-dom";
+import React, { useContext } from "react";
+import {
+  BrowserRouter as Router,
+  Route,
+  Routes,
+  useNavigate,
+} from "react-router-dom";
 
 import Sidebar from "./Sidebar";
 import Dashboard from "./DashBoard";
@@ -14,6 +19,7 @@ import PromoteStudent from "../Pages/StudentPage/PromoteStudent";
 // import Employees from '../Pages/EmployeePage/Employees';
 import AddEmployee from "../Pages/EmployeePage/AddEmployee";
 import AllEmployee from "../Pages/EmployeePage/AllEmployee";
+import ViewEmployee from "../Pages/EmployeePage/ViewEmployee";
 // import EmpID from '../Pages/EmployeePage/EmpID';
 
 // import Accounts from '../Pages/AccountPage/Accounts';
@@ -63,8 +69,7 @@ import SignIn from "../Pages/SignUp&SignIn/SignIn";
 import { AuthContext } from "../../context/AuthContext";
 
 function MainDashBoard() {
-
-  const {auth} = useContext(AuthContext);
+  const { auth } = useContext(AuthContext);
   const navigate = useNavigate();
 
   React.useEffect(() => {
@@ -74,7 +79,7 @@ function MainDashBoard() {
   }, [auth, navigate]);
 
   return auth.isAuthenticated ? (
-      <div className="flex ">
+    <div className="flex ">
       <div className="sticky top-0 h-screen z-10">
         <Sidebar className="h-full overflow-hidden" />
       </div>
@@ -104,6 +109,7 @@ function MainDashBoard() {
             {/* <Route path="/employees" element={<Employees />} /> */}
             <Route path="/employees/employeeForm" element={<AddEmployee />} />
             <Route path="/employees/allEmployees" element={<AllEmployee />} />
+            <Route path="/employees/view" element={<ViewEmployee />} />
             {/* <Route path="/employees/eId" element={<EmpID />} /> */}
 
             {/* <Route path="/accounts" element={<Accounts />} /> */}
@@ -162,12 +168,9 @@ function MainDashBoard() {
         </div>
       </div>
     </div>
-    ) : (
-      <SignIn />
-    )
-  
-  
-  
+  ) : (
+    <SignIn />
+  );
 }
 
 export default MainDashBoard;
