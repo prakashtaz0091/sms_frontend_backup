@@ -5,10 +5,12 @@ import StateDistrictSelect from "../SignUp&SignIn/StatesDistricts";
 import axios from "axios";
 import { AuthContext } from "../../../context/AuthContext";
 import satesDistrictsJSON from "../SignUp&SignIn/statesDistricts.json";
+import { useNavigate } from "react-router-dom";
 
 const baseUrl = import.meta.env.VITE_API_BASE_URL;
 
 function AdmissionForm() {
+  const navigate = useNavigate()
   const { api } = useContext(AuthContext);
 
   const [classes, setClasses] = useState([]);
@@ -20,7 +22,13 @@ function AdmissionForm() {
         setClasses(response.data);
         // console.log(response.data);
 
-        localStorage.setItem(
+        if (response.data[0] == undefined){
+          alert("Please go to configuration and add classes first")
+          navigate('/config/classes')
+          
+        }
+        else{
+          localStorage.setItem( 
           "classes_for_config",
           JSON.stringify(response.data)
         );
@@ -30,7 +38,7 @@ function AdmissionForm() {
             ...prev,
             classOfAdmission: response.data[0].id,
           };
-        });
+        });}
       } catch (error) {
         console.error("Error fetching data:", error);
       }
