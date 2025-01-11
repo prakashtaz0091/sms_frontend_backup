@@ -19,6 +19,8 @@ const AllStudents = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [originalRows, setOriginalRows] = useState([]); // Store original data before editing
   const [classes, setClasses] = useState([]);
+  const [showFilterOptions, setShowFilterOptions] = useState(false);
+  const [filterOption, setFilterOption] = useState("name");
 
   const [pagination, setPagination] = useState({
     currentPage: 1,
@@ -53,7 +55,6 @@ const AllStudents = () => {
     const fetchData = async () => {
       try {
         const response = await api.get("/student/");
-        console.log(response.data);
         setRows(response.data);
         setPagination({
           ...pagination,
@@ -84,48 +85,100 @@ const AllStudents = () => {
     fetchData();
   }, [api]);
 
-  const filterRows = (criteria) => {
-    const lowercasedCriteria = criteria.toLowerCase();
-
-    const filtered = rows.filter((row) => {
-      const {
-        enrollmentId,
-        name,
-        gender,
-        class: studentClass,
-        phoneNo,
-        fatherName,
-      } = row;
-
-      const matchesEnrollmentId = enrollmentId
-        .toLowerCase()
-        .includes(lowercasedCriteria);
-      const matchesName = name.toLowerCase().includes(lowercasedCriteria);
-      const matchesGender = gender.toLowerCase() === lowercasedCriteria; // Exact match for gender
-      const matchesPhoneNo = phoneNo.toLowerCase().includes(lowercasedCriteria);
-      const matchesFatherName = fatherName
-        .toLowerCase()
-        .includes(lowercasedCriteria);
-      const matchesClass =
-        String(studentClass).toLowerCase() === lowercasedCriteria; // Exact match for class
-
-      return (
-        matchesEnrollmentId ||
-        matchesName ||
-        matchesGender ||
-        matchesPhoneNo ||
-        matchesFatherName ||
-        matchesClass
-      );
-    });
-
-    setFilteredRows(
-      filtered.length > 0 ? filtered : [{ message: "No data found" }]
-    );
+  const isSearchTermValid = (lowerCaseSearchTerm) => {
+    if (!lowerCaseSearchTerm.includes(",")) {
+      alert("Invalid search term, please enter comma separated search term.");
+      return false;
+    } else {
+      return true;
+    }
   };
 
   const handleSearch = () => {
-    filterRows(searchTerm);
+    const lowerCaseSearchTerm = searchTerm.toLowerCase();
+    let new_rows = filteredRows;
+    switch (filterOption) {
+      case "name":
+        new_rows = rows.filter((row) => {
+          const fullName = `${row.student_full_name}`.toLowerCase();
+          return fullName.includes(lowerCaseSearchTerm);
+        });
+        break;
+
+      case "class":
+        new_rows = rows.filter((row) => {
+          return classes
+            .find((cls) => cls.id == row.classOfAdmission)
+            ?.name.toLowerCase()
+            .includes(lowerCaseSearchTerm);
+        });
+        break;
+
+      case "gender":
+        new_rows = rows.filter((row) => {
+          return row.gender && row.gender.toLowerCase() == lowerCaseSearchTerm;
+        });
+        break;
+
+      case "enrollmentId":
+        new_rows = rows.filter((row) => {
+          return (
+            row.enrollmentId &&
+            row.enrollmentId.toLowerCase() == lowerCaseSearchTerm
+          );
+        });
+        break;
+
+      case "class&rollNo":
+        if (isSearchTermValid(lowerCaseSearchTerm)) {
+          const search_class = lowerCaseSearchTerm.split(",")[0];
+          const search_rollNo = lowerCaseSearchTerm.split(",")[1];
+          new_rows = rows.filter((row) => {
+            return (
+              classes
+                .find((cls) => cls.id == row.classOfAdmission)
+                ?.name.toLowerCase()
+                .includes(search_class) && row.rollNo == search_rollNo
+            );
+          });
+        }
+        break;
+
+      case "name&fatherName":
+        if (isSearchTermValid(lowerCaseSearchTerm)) {
+          const name = lowerCaseSearchTerm.split(",")[0];
+          const fatherName = lowerCaseSearchTerm.split(",")[1];
+          new_rows = rows.filter((row) => {
+            return (
+              row.student_full_name.toLowerCase().includes(name) &&
+              row.father_full_name.toLowerCase().includes(fatherName)
+            );
+          });
+        }
+        break;
+
+      case "class&gender":
+        if (isSearchTermValid(lowerCaseSearchTerm)) {
+          const class_name = lowerCaseSearchTerm.split(",")[0];
+          const gender = lowerCaseSearchTerm.split(",")[1].trim();
+
+          new_rows = rows.filter((row) => {
+            return (
+              classes
+                .find((cls) => cls.id == row.classOfAdmission)
+                ?.name.toLowerCase()
+                .includes(class_name) &&
+              row.gender.toLowerCase() == gender.toLowerCase()
+            );
+          });
+        }
+        break;
+
+      default:
+        new_rows = filteredRows;
+    }
+
+    setFilteredRows(new_rows);
   };
 
   const handleRefresh = () => {
@@ -312,16 +365,112 @@ const AllStudents = () => {
         {/* Search Bar */}
         <div className="flex flex-row gap-4 justify-end items-center py-10">
           <div>
-            <div className="flex items-center bg-white rounded-full">
+            <div className=" relative flex items-center bg-white rounded-full">
               <IoFilterSharp
-                className="text-gray-600 ml-4 cursor-pointer"
+                className="ml-4 text-gray-600 hover:text-blue-500 transform hover:scale-110 transition-transform duration-200 text-xl"
                 size={24}
-                onClick={() => filterRows(searchTerm)} // Trigger filter on click
+                onClick={() => setShowFilterOptions((prev) => !prev)}
               />
+              {/* Sorting Options Popup */}
+              {showFilterOptions && (
+                <div className="absolute left-[-150px] top-0">
+                  {/* Tooltip container */}
+                  <div className="relative bg-white border border-gray-300 p-2 rounded-lg shadow-lg w-40">
+                    {/* Sort Options */}
+                    <div
+                      className="p-2 cursor-pointer hover:bg-gray-200"
+                      onClick={() => {
+                        setShowFilterOptions(false);
+                        setSearchTerm("");
+                        setFilterOption("name");
+                      }}
+                    >
+                      Name
+                    </div>
+                    <div
+                      className="p-2 cursor-pointer hover:bg-gray-200"
+                      onClick={() => {
+                        setShowFilterOptions(false);
+                        setSearchTerm("");
+                        setFilterOption("enrollmentId");
+                      }}
+                    >
+                      Enrollment ID
+                    </div>
+                    <div
+                      className="p-2 cursor-pointer hover:bg-gray-200"
+                      onClick={() => {
+                        setShowFilterOptions(false);
+                        setSearchTerm("");
+                        setFilterOption("gender");
+                      }}
+                    >
+                      Gender
+                    </div>
+                    <div
+                      className="p-2 cursor-pointer hover:bg-gray-200"
+                      onClick={() => {
+                        setShowFilterOptions(false);
+                        setSearchTerm("");
+                        setFilterOption("class");
+                      }}
+                    >
+                      Class
+                    </div>
+                    <div
+                      className="p-2 cursor-pointer hover:bg-gray-200"
+                      onClick={() => {
+                        setShowFilterOptions(false);
+                        setSearchTerm("");
+                        setFilterOption("class&rollNo");
+                      }}
+                    >
+                      Class & Roll No
+                    </div>
+                    <div
+                      className="p-2 cursor-pointer hover:bg-gray-200"
+                      onClick={() => {
+                        setShowFilterOptions(false);
+                        setSearchTerm("");
+                        setFilterOption("name&fatherName");
+                      }}
+                    >
+                      Name & FatherName
+                    </div>
+                    <div
+                      className="p-2 cursor-pointer hover:bg-gray-200"
+                      onClick={() => {
+                        setShowFilterOptions(false);
+                        setSearchTerm("");
+                        setFilterOption("class&gender");
+                      }}
+                    >
+                      Class & Gender
+                    </div>
+                    {/* Tip/Arrow at the bottom */}
+                  </div>
+                </div>
+              )}
               <div className="w-px h-6 bg-gray-600 mx-4"></div>
               <input
                 type="text"
-                placeholder="Search"
+                placeholder={
+                  filterOption === "name"
+                    ? "eg. John Doe"
+                    : filterOption === "enrollmentId"
+                    ? "eg. ENR-10EABB4BD0	"
+                    : filterOption === "gender"
+                    ? "eg. male/female"
+                    : filterOption === "class"
+                    ? "eg. class 01"
+                    : filterOption === "class&rollNo"
+                    ? "eg. class 01, rollno 1"
+                    : filterOption === "name&fatherName"
+                    ? "eg. John Doe, Father Name"
+                    : filterOption === "class&gender"
+                    ? "eg. class 01, male/female"
+                    : "Search"
+                }
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="flex-grow px-4 py-2 text-gray-600 placeholder-gray-500 bg-transparent focus:outline-none"
