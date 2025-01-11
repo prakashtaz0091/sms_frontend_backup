@@ -53,7 +53,7 @@ const AllStudents = () => {
     const fetchData = async () => {
       try {
         const response = await api.get("/student/");
-        // console.log(response.data);
+        console.log(response.data);
         setRows(response.data);
         setPagination({
           ...pagination,
@@ -130,6 +130,9 @@ const AllStudents = () => {
 
   const handleRefresh = () => {
     setFilteredRows(rows);
+    rows.forEach((row, index) => {
+      row.isEditing = false;
+    });
     setSearchTerm("");
     setPagination({
       ...pagination,
@@ -247,7 +250,7 @@ const AllStudents = () => {
     // Append each field to the FormData object
     for (const key in updatedData) {
       //check that key is not empty
-      console.log(key);
+      // console.log(key);
 
       if (key == "studentMiddleName" || key == "fatherMiddleName") {
         // this means, if middlename is empty commit it as empty to database
@@ -446,7 +449,7 @@ const AllStudents = () => {
                             ?.name
                         )}
                       </td>
-                      <td className="p-2 text-center">{row.id}</td>
+                      <td className="p-2 text-center">{row.rollNo}</td>
                       <td className="p-2 text-center">
                         {row.isEditing ? (
                           <input
