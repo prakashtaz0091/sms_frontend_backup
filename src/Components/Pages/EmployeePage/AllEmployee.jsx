@@ -17,6 +17,8 @@ const AllEmployee = () => {
   const { api } = useContext(AuthContext);
 
   const [showFilterOptions, setShowFilterOptions] = useState(false);
+  const [roles, setRoles] = useState([]);
+  const [subjects, setSubjects] = useState([]);
 
   const [rows, setRows] = useState([]);
   const [filteredRows, setFilteredRows] = useState([]);
@@ -48,7 +50,7 @@ const AllEmployee = () => {
   useEffect(() => {
     applyPagination();
   }, [rows, pagination]);
-  React.useEffect(() => {
+  useEffect(() => {
     const getData = async () => {
       try {
         const response = await api.get("/employee/");
@@ -66,6 +68,42 @@ const AllEmployee = () => {
       }
     };
     getData();
+
+    const getRoles = async () => {
+      try {
+        const response = await api.get("/get_roles/");
+
+        if (response.data.length > 0) {
+          setRoles(response.data);
+        } else {
+          alert("Please request admin to add roles first, then try again");
+          navigate("/employees/allEmployees");
+        }
+      } catch (error) {
+        alert("Something went wrong");
+        // console.error("Error fetching roles:", error);
+      }
+    };
+
+    getRoles();
+
+    const getSubjects = async () => {
+      try {
+        const response = await api.get("/get_subjects_for_config/");
+
+        if (response.data.length > 0) {
+          setSubjects(response.data);
+        } else {
+          alert("Please add subjects first, then try again");
+          navigate("/config/createSub");
+        }
+      } catch (error) {
+        alert("Something went wrong");
+        // console.error("Error fetching subjects:", error);
+      }
+    };
+
+    getSubjects();
   }, [api]);
 
   const setRecordsPerPage = (recordsPerPage) => {
@@ -79,58 +117,14 @@ const AllEmployee = () => {
     }));
   };
 
-  // Function to filter rows based on criteria
-  const filterRows = (criteria) => {
-    // Convert criteria to lowercase for case-insensitive matching
-    const lowercasedCriteria = criteria.toLowerCase();
-
-    const filtered = rows.filter((row) => {
-      const { enrollmentId, name, fatherName, gender, mainSubject, phoneNo } =
-        row;
-
-      // Check other fields for partial matches (case-insensitive)
-      const matchesEnrollmentId = enrollmentId
-        .toLowerCase()
-        .includes(lowercasedCriteria);
-
-      const matchesName = name.toLowerCase().includes(lowercasedCriteria);
-
-      const matchesGender = gender.toLowerCase() === lowercasedCriteria; // Exact match for gender
-      const matchesMainSubject = mainSubject
-        .toLowerCase()
-        .includes(lowercasedCriteria);
-
-      const matchesPhoneNo = phoneNo.toLowerCase().includes(lowercasedCriteria);
-
-      const matchesFatherName = fatherName
-        .toLowerCase()
-        .includes(lowercasedCriteria);
-
-      // If no exact match for class, check other fields
-      return (
-        matchesEnrollmentId ||
-        matchesName ||
-        matchesGender ||
-        matchesPhoneNo ||
-        matchesFatherName ||
-        matchesMainSubject
-      );
-    });
-
-    // If no rows match, show "No data found" message
-    if (filtered.length > 0) {
-      setFilteredRows(filtered);
-    } else {
-      setFilteredRows([{ message: "No data found" }]);
-    }
-  };
-
   // Function to handle search
   const handleSearch = () => {
     let newRows = [];
     if (selectedFilter === "employeeId") {
       newRows = rows.filter((row) => {
-        return row.employeeId.toLowerCase().includes(searchTerm.toLowerCase());
+        return row.employeeId
+          .toLowerCase()
+          .includes(searchTerm.trim().toLowerCase());
       });
     } else if (selectedFilter === "name") {
       newRows = rows.filter((row) => {
@@ -140,9 +134,13 @@ const AllEmployee = () => {
         return fullName.toLowerCase().includes(searchTerm.toLowerCase());
       });
     } else if (selectedFilter === "role") {
-      newRows = rows.filter((row) => {
-        return row.employeeId.toLowerCase().includes(searchTerm.toLowerCase());
-      });
+      newRows = rows.filter((row) =>
+        roles?.some(
+          (role) =>
+            role.id === row.selectRole &&
+            role.name.toLowerCase().includes(searchTerm.toLowerCase())
+        )
+      );
     } else if (selectedFilter === "gender") {
       console.log(searchTerm);
 
@@ -199,7 +197,7 @@ const AllEmployee = () => {
 
   // Function to handle edit
   const handleEdit = (index) => {
-    const employee = filterRows[index];
+    const employee = filteredRows[index];
     // navigate("/employee/edit", { state: { employee } });
   };
 
@@ -520,7 +518,8 @@ const AllEmployee = () => {
                           className="border rounded w-full py-1 px-2"
                         />
                       ) : (
-                        row.selectRole
+                        roles &&
+                        roles.find((role) => role.id === row.selectRole)?.name
                       )}
                     </td>
                     <td className="p-2 text-center">
@@ -551,7 +550,10 @@ const AllEmployee = () => {
                           className="border rounded w-full py-1 px-2"
                         />
                       ) : (
-                        row.mainSubject
+                        subjects &&
+                        subjects.find(
+                          (subject) => subject.id === row.mainSubject
+                        )?.name
                       )}
                     </td>
 

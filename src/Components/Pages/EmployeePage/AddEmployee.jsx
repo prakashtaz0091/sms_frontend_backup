@@ -10,13 +10,16 @@ import { useNavigate } from "react-router-dom";
 import { sub } from "date-fns";
 function AddEmployee() {
   const navigate = useNavigate();
-  // Select complimentry logic
-  const [selectedOptions, setSelectedOptions] = useState([]);
-  // const [isOpen, setIsOpen] = useState(false);
-  // const [district, SetDistrict] = useState("district");
+
   const { api } = useContext(AuthContext);
   const [roles, setRoles] = useState([]);
   const [subjects, setSubjects] = useState([]);
+
+  const [states, setStates] = useState(getStates(statesDistricts));
+  const [districts, setDistricts] = useState([]);
+
+  const [cstates, setcStates] = useState(getStates(statesDistricts));
+  const [cdistricts, setcDistricts] = useState([]);
 
   useEffect(() => {
     const getRoles = async () => {
@@ -99,8 +102,8 @@ function AddEmployee() {
     bioData: "",
     educationalDetails: "",
     experience: "",
-    mainSubject: "",
-    complementarySubject: "",
+    mainSubject: null,
+    complementarySubjects: null,
     remarks: "",
   };
 
@@ -144,13 +147,23 @@ function AddEmployee() {
     }
   };
 
+  function getStates(jsonData) {
+    return jsonData.states.map((stateObj) => stateObj.state);
+  }
+
+  function getDistrictsByState(jsonData, stateName) {
+    const stateObj = jsonData.states.find(
+      (stateObj) => stateObj.state === stateName
+    );
+    return stateObj ? stateObj.districts : []; // Return districts or empty array if state not found
+  }
+
   const handleSubmit = async (values, { resetForm }) => {
     // // Log the form values
     // console.log("Form Submitted successfully");
     // console.log("Form Data", values);
 
     // Reset the form after successful submission
-    resetForm();
     // Manually reset the file input
     if (fileInputRef1.current) {
       fileInputRef1.current.value = null; // Reset the file input field
@@ -165,39 +178,33 @@ function AddEmployee() {
     setFileName2("");
     setFileSizeError2("");
 
+    const updatedValues = {
+      ...values,
+      complementarySubjects: values.complementarySubjects.map((value) =>
+        parseInt(value, 10)
+      ),
+      mainSubject: parseInt(values.mainSubject, 10),
+      selectRole: parseInt(values.selectRole, 10),
+    };
+    // console.log(updatedValues);
+
     let FORMDATA = new FormData();
-    for (const key in values) {
+    for (const key in updatedValues) {
       FORMDATA.append(key, values[key]);
     }
     // console.log(values, FORMDATA);
 
     try {
-      // Make the API call to update the student
+      // / Make the API call to update the student
       const response = await api.post(`/employee/`, FORMDATA);
       // console.log(response.data);
       alert("Employee added successfully!");
+      resetForm();
     } catch (error) {
-      console.error("Failed ", error.response);
+      // console.error("Failed ", error.response);
       // Handle error (e.g., show a notification)
     }
   };
-
-  function getStates(jsonData) {
-    return jsonData.states.map((stateObj) => stateObj.state);
-  }
-
-  function getDistrictsByState(jsonData, stateName) {
-    const stateObj = jsonData.states.find(
-      (stateObj) => stateObj.state === stateName
-    );
-    return stateObj ? stateObj.districts : []; // Return districts or empty array if state not found
-  }
-
-  const [states, setStates] = useState(getStates(statesDistricts));
-  const [districts, setDistricts] = useState([]);
-
-  const [cstates, setcStates] = useState(getStates(statesDistricts));
-  const [cdistricts, setcDistricts] = useState([]);
 
   return (
     <div className="bg-pink-100 min-h-screen p-8">
@@ -1015,7 +1022,9 @@ function AddEmployee() {
                     </option>
                     {subjects &&
                       subjects.map((subject) => (
-                        <option value={subject.id}>{subject.name}</option>
+                        <option value={parseInt(subject.id)}>
+                          {subject.name}
+                        </option>
                       ))}
                   </Field>
                   <ErrorMessage
@@ -1032,17 +1041,17 @@ function AddEmployee() {
                   </label>
                   <Field
                     as="select"
-                    name="complementarySubject"
+                    multiple
+                    name="complementarySubjects"
                     className="mt-1 block w-full p-2 bg-white border border-gray-300 rounded-3xl"
                   >
-                    <option value="" disabled selected>
-                      Main Subject
-                    </option>
                     {subjects &&
                       subjects.map((subject) => {
                         if (subject.id !== parseInt(values.mainSubject)) {
                           return (
-                            <option value={subject.id}>{subject.name}</option>
+                            <option value={parseInt(subject.id)}>
+                              {subject.name}
+                            </option>
                           );
                         }
                       })}
@@ -1079,7 +1088,7 @@ function AddEmployee() {
                 <button
                   type="submit"
                   className="bg-pink-500 text-white font-semibold px-6 py-2 rounded-3xl shadow-md hover:bg-pink-600"
-                  // onClick={handleSubmit}
+                  onClick={handleSubmit}
                 >
                   Submit
                 </button>
