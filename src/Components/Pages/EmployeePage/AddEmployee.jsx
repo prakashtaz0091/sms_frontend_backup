@@ -1,4 +1,4 @@
-import React, { useState, useRef, useContext } from "react";
+import React, { useState, useRef, useContext, useEffect } from "react";
 import { MdOutlineFileUpload } from "react-icons/md";
 import { MdBusinessCenter } from "react-icons/md";
 import { Formik, Form, Field, ErrorMessage } from "formik";
@@ -6,30 +6,55 @@ import { formValidationSchema } from "./EmpValidations";
 // import DistrictStates from "./DistrictStates";
 import statesDistricts from "../SignUp&SignIn/statesDistricts.json";
 import { AuthContext } from "../../../context/AuthContext";
-
+import { useNavigate } from "react-router-dom";
+import { sub } from "date-fns";
 function AddEmployee() {
+  const navigate = useNavigate();
   // Select complimentry logic
   const [selectedOptions, setSelectedOptions] = useState([]);
-  const [isOpen, setIsOpen] = useState(false);
+  // const [isOpen, setIsOpen] = useState(false);
   // const [district, SetDistrict] = useState("district");
   const { api } = useContext(AuthContext);
+  const [roles, setRoles] = useState([]);
+  const [subjects, setSubjects] = useState([]);
 
-  const options = ["Python", "C++", "DSA"];
+  useEffect(() => {
+    const getRoles = async () => {
+      try {
+        const response = await api.get("/get_roles/");
 
-  const toggleDropdown = () => {
-    setIsOpen(!isOpen);
-  };
+        if (response.data.length > 0) {
+          setRoles(response.data);
+        } else {
+          alert("Please request admin to add roles first, then try again");
+          navigate("/employees/allEmployees");
+        }
+      } catch (error) {
+        alert("Something went wrong");
+        // console.error("Error fetching roles:", error);
+      }
+    };
 
-  const selectOption = (option) => {
-    if (!selectedOptions.includes(option)) {
-      setSelectedOptions([...selectedOptions, option]);
-    }
-    setIsOpen(false);
-  };
+    getRoles();
 
-  const removeOption = (option) => {
-    setSelectedOptions(selectedOptions.filter((item) => item !== option));
-  };
+    const getSubjects = async () => {
+      try {
+        const response = await api.get("/get_subjects_for_config/");
+
+        if (response.data.length > 0) {
+          setSubjects(response.data);
+        } else {
+          alert("Please add subjects first, then try again");
+          navigate("/config/createSub");
+        }
+      } catch (error) {
+        alert("Something went wrong");
+        // console.error("Error fetching subjects:", error);
+      }
+    };
+
+    getSubjects();
+  }, [api]);
 
   const initialValues = {
     employeeFirstName: "",
@@ -409,10 +434,11 @@ function AddEmployee() {
                     <option value="" disabled selected>
                       Select Role
                     </option>
-                    <option value="teacher">Teacher</option>
-                    <option value="peon">Peon</option>
-                    <option value="finance">Finance Manager</option>
-                    <option value="labAssistance">Lab Assistance</option>
+                    {roles.map((role) => (
+                      <option key={role.id} value={role.id}>
+                        {role.name}
+                      </option>
+                    ))}
                   </Field>
                   <ErrorMessage
                     name="selectRole"
@@ -987,10 +1013,10 @@ function AddEmployee() {
                     <option value="" disabled selected>
                       Main Subject
                     </option>
-                    <option value="Math">Maths</option>
-                    <option value="Science">Science</option>
-                    <option value="Social">Social</option>
-                    <option value="English">English</option>
+                    {subjects &&
+                      subjects.map((subject) => (
+                        <option value={subject.id}>{subject.name}</option>
+                      ))}
                   </Field>
                   <ErrorMessage
                     name="mainSubject"
@@ -1004,51 +1030,23 @@ function AddEmployee() {
                   <label className="font-sans text-base font-bold leading-5 text-left">
                     Complimentary Subjects
                   </label>
-                  <div className="relative">
-                    <div
-                      className="mt-1 block w-full p-2 bg-white border border-gray-300 rounded-3xl cursor-pointer"
-                      onClick={toggleDropdown}
-                    >
-                      <div className="flex flex-wrap">
-                        {selectedOptions.length > 0 ? (
-                          selectedOptions.map((option, index) => (
-                            <div
-                              key={index}
-                              className="bg-blue-500 text-white px-2 py-1 rounded-full mr-2 mb-2 flex items-center"
-                            >
-                              {option}
-                              <button
-                                className="ml-2 text-white"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  removeOption(option);
-                                }}
-                              >
-                                &times;
-                              </button>
-                            </div>
-                          ))
-                        ) : (
-                          <span className="text-gray-400">
-                            Select subjects...
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                    {isOpen && (
-                      <ul className="absolute w-full bg-white border border-gray-300 rounded-3xl mt-1 max-h-48 overflow-y-auto z-10">
-                        {options.map((option, index) => (
-                          <li
-                            key={index}
-                            className="p-2 cursor-pointer hover:bg-gray-200"
-                            onClick={() => selectOption(option)}
-                          >
-                            {option}
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-                  </div>
+                  <Field
+                    as="select"
+                    name="complementarySubject"
+                    className="mt-1 block w-full p-2 bg-white border border-gray-300 rounded-3xl"
+                  >
+                    <option value="" disabled selected>
+                      Main Subject
+                    </option>
+                    {subjects &&
+                      subjects.map((subject) => {
+                        if (subject.id !== parseInt(values.mainSubject)) {
+                          return (
+                            <option value={subject.id}>{subject.name}</option>
+                          );
+                        }
+                      })}
+                  </Field>
                 </div>
               </div>
               <div className=" mb-4">
