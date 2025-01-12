@@ -10,7 +10,7 @@ import { useNavigate } from "react-router-dom";
 const baseUrl = import.meta.env.VITE_API_BASE_URL;
 
 function AdmissionForm() {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   const { api } = useContext(AuthContext);
 
   const [classes, setClasses] = useState([]);
@@ -22,23 +22,22 @@ function AdmissionForm() {
         setClasses(response.data);
         // console.log(response.data);
 
-        if (response.data[0] == undefined){
-          alert("Please go to configuration and add classes first")
-          navigate('/config/classes')
-          
-        }
-        else{
-          localStorage.setItem( 
-          "classes_for_config",
-          JSON.stringify(response.data)
-        );
+        if (response.data[0] == undefined) {
+          alert("Please go to configuration and add classes first");
+          navigate("/config/classes");
+        } else {
+          localStorage.setItem(
+            "classes_for_config",
+            JSON.stringify(response.data)
+          );
 
-        setFormData((prev) => {
-          return {
-            ...prev,
-            classOfAdmission: response.data[0].id,
-          };
-        });}
+          setFormData((prev) => {
+            return {
+              ...prev,
+              classOfAdmission: response.data[0].id,
+            };
+          });
+        }
       } catch (error) {
         console.error("Error fetching data:", error);
       }
@@ -511,6 +510,7 @@ function AdmissionForm() {
                 ref={fileInputRef}
                 style={{ display: "none" }}
                 className="rounded-3xl"
+                name="photo"
               />
               <button
                 type="button"

@@ -10,9 +10,7 @@ function ViewStudent() {
   const { state } = location || {};
   const student = state?.student || {};
   const classes = state?.classes || {};
-  useEffect(() => {
-    console.log(student);
-  }, []);
+
   return (
     <div className="bg-pink-100 min-h-screen p-8">
       <div className="flex gap-4    rounded-3xl p-2">

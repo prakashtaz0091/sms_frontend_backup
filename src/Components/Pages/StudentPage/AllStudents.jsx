@@ -231,9 +231,13 @@ const AllStudents = () => {
   };
 
   const handleEdit = (index) => {
-    const newRows = [...filteredRows];
-    newRows[index].isEditing = true; // Mark the row as being edited
-    setFilteredRows(newRows);
+    const student = filteredRows[index];
+    navigate("/student/edit", {
+      state: {
+        student,
+        classes,
+      },
+    });
   };
 
   const handleCancel = (index) => {
