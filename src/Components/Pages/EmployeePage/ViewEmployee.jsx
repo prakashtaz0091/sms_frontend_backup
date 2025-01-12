@@ -154,7 +154,11 @@ function ViewEmployee() {
                 <label className="font-sans text-base font-bold leading-5 text-left">
                   Employee Photo
                 </label>
-                <img src="" alt="" />
+                <img
+                  src={employee.photoUpload}
+                  alt="no photo"
+                  className="w-32 h-32 rounded-full object-cover"
+                />
               </div>
             </div>
 
