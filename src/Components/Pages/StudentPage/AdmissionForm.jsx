@@ -334,42 +334,24 @@ function AdmissionForm() {
   // Handle form submission
   const handleSubmit = (e) => {
     e.preventDefault();
+    const formElement = e.target;
+    const formData = new FormData(formElement);
 
-    if (validate()) {
-      // console.log("Form submitted successfully!", formData);
-      localStorage.setItem("formData", JSON.stringify(formData));
-
-      // Reset the form data after submission
-      setFormData(initialFormValues);
-
-      setErrors({});
-
-      console.log(formData);
-
-      let FORMDATA = new FormData();
-      for (const key in formData) {
-        FORMDATA.append(key, formData[key]);
-      }
-
-      const token = auth.token; // Replace with your actual token
-      // console.log(token);
-
-      axios
-        .post(`${baseUrl}/student/`, FORMDATA, {
-          headers: {
-            accept: "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        })
-        .then((res) => {
+    const sendData = async () => {
+      if (validate()) {
+        try {
+          const res = await api.post("/student/", formData);
+          // console.log(res);
           alert("Admission Successful");
-        })
-        .catch((err) => {
+          navigate("/students/allStudents");
+        } catch (err) {
           console.log(err);
-        });
-    } else {
-      console.log("Form has errors. Please correct them and try again.");
-    }
+        }
+      } else {
+        alert("Please fill the form properly");
+      }
+    };
+    sendData();
   };
 
   // Handle file upload click (optional based on file handling logic)
