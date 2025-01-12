@@ -9,10 +9,12 @@ import { IoFilterSharp } from "react-icons/io5";
 import { MdCancel } from "react-icons/md";
 import axios from "axios";
 import { AuthContext } from "../../../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 const baseUrl = import.meta.env.VITE_API_BASE_URL;
 
 const AllStudents = () => {
+  const navigate = useNavigate();
   const [rows, setRows] = useState([]);
   const [filteredRows, setFilteredRows] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -346,6 +348,11 @@ const AllStudents = () => {
     setFilteredRows(newRows);
   };
 
+  const handleView = (index) => {
+    const student = filteredRows[index];
+    navigate("/student/view", { state: { student, classes } });
+  };
+
   return isLoading ? (
     <div>Loading...</div>
   ) : (
@@ -634,7 +641,10 @@ const AllStudents = () => {
                         ) : (
                           // Show Eye, Edit, and Delete buttons when not in edit mode
                           <div className="flex justify-center items-center">
-                            <button className="p-1 mr-2 text-black w-8 h-8 flex justify-center items-center transition-colors duration-300 hover:bg-gray-400">
+                            <button
+                              className="p-1 mr-2 text-black w-8 h-8 flex justify-center items-center transition-colors duration-300 hover:bg-gray-400"
+                              onClick={() => handleView(index)}
+                            >
                               <FaRegEye className="text-lg" />
                             </button>
                             <button

@@ -67,6 +67,7 @@ import EditPage from "../Pages/ConfigurationPage/EditPage";
 import SignIn from "../Pages/SignUp&SignIn/SignIn";
 
 import { AuthContext } from "../../context/AuthContext";
+import ViewStudent from "../Pages/StudentPage/ViewStudent";
 
 function MainDashBoard() {
   const { auth } = useContext(AuthContext);
@@ -98,6 +99,7 @@ function MainDashBoard() {
             <Route path="/accountSetting" element={<AccountSetting />} />
 
             {/* <Route path="/students" element={<Students />} /> */}
+            <Route path="/student/view" element={<ViewStudent />} />
             <Route path="/students/admissionForm" element={<AdmissionForm />} />
             <Route path="/students/allStudents" element={<AllStudents />} />
             <Route
