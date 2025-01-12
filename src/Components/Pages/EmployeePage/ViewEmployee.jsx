@@ -5,12 +5,52 @@ import { useLocation } from "react-router-dom";
 
 function ViewEmployee() {
   const { api } = useContext(AuthContext);
+  const [roles, setRoles] = useState([]);
+  const [subjects, setSubjects] = useState([]);
 
   const location = useLocation(); // Get location object
   const { state } = location || {}; // Destructure state from location safely
 
   const employee = state?.employee || {};
   // console.log(employee);
+
+  useEffect(() => {
+    const getRoles = async () => {
+      try {
+        const response = await api.get("/get_roles/");
+
+        if (response.data.length > 0) {
+          setRoles(response.data);
+        } else {
+          alert("Please request admin to add roles first, then try again");
+          navigate("/employees/allEmployees");
+        }
+      } catch (error) {
+        alert("Something went wrong");
+        // console.error("Error fetching roles:", error);
+      }
+    };
+
+    getRoles();
+
+    const getSubjects = async () => {
+      try {
+        const response = await api.get("/get_subjects_for_config/");
+
+        if (response.data.length > 0) {
+          setSubjects(response.data);
+        } else {
+          alert("Please add subjects first, then try again");
+          navigate("/config/createSub");
+        }
+      } catch (error) {
+        alert("Something went wrong");
+        // console.error("Error fetching subjects:", error);
+      }
+    };
+
+    getSubjects();
+  }, [api]);
 
   return (
     employee && (
@@ -177,7 +217,8 @@ function ViewEmployee() {
                   name="selectRole"
                   className="mt-1 block w-full p-2  border border-gray-300 rounded-3xl"
                 >
-                  {employee.selectRole}
+                  {roles &&
+                    roles.find((role) => role.id == employee.selectRole)?.name}
                 </div>
               </div>
             </div>
@@ -532,7 +573,12 @@ function ViewEmployee() {
                   Main Subject
                 </label>
                 <div className="mt-1 block w-full p-2  border border-gray-300 rounded-3xl">
-                  {employee.mainSubject ?? "Not provided"}
+                  {employee.mainSubject
+                    ? subjects &&
+                      subjects.find(
+                        (subject) => subject.id == employee.mainSubject
+                      )?.name
+                    : "Not provided"}
                 </div>
               </div>
 
@@ -542,7 +588,15 @@ function ViewEmployee() {
                   Complimentary Subjects
                 </label>
                 <div className="mt-1 block w-full p-2  border border-gray-300 rounded-3xl">
-                  {employee.complementarySubject ?? "Not provided"}
+                  {employee.complementarySubjects
+                    ? subjects &&
+                      subjects
+                        .filter((subject) =>
+                          employee.complementarySubjects.includes(subject.id)
+                        )
+                        .map((subject) => subject.name)
+                        .join(", ")
+                    : "Not provided"}
                 </div>
               </div>
             </div>
