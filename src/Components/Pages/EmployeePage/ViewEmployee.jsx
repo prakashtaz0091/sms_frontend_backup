@@ -10,6 +10,7 @@ function ViewEmployee() {
   const { state } = location || {}; // Destructure state from location safely
 
   const employee = state?.employee || {};
+  // console.log(employee);
 
   return (
     employee && (
@@ -492,9 +493,19 @@ function ViewEmployee() {
                 </div>
               </div>
               <div className="relative mb-4">
-                <label className="font-sans text-base font-bold leading-5 text-left">
-                  Upload Biodata
-                </label>
+                {employee.bioData ? (
+                  <a
+                    href={employee.bioData}
+                    target="_blank"
+                    className="text-blue-600 font-semibold cursor-pointer hover:underline"
+                  >
+                    View Biodata
+                  </a>
+                ) : (
+                  <div className="text-dark-600 font-semibold cursor-pointer">
+                    Biodata Not provided
+                  </div>
+                )}
               </div>
             </div>
             <div className="grid grid-cols-6 gap-4">
