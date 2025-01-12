@@ -23,8 +23,6 @@ const AllEmployee = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [originalRows, setOriginalRows] = useState([]); // To store original data before editing
 
-  const [isEditing, setIsEditing] = useState(false);
-  const [currentRow, setCurrentRow] = useState(null);
   const [selectedFilter, setSelectedFilter] = useState("employeeId");
 
   const [pagination, setPagination] = useState({
@@ -201,15 +199,8 @@ const AllEmployee = () => {
 
   // Function to handle edit
   const handleEdit = (index) => {
-    const newRows = [...filteredRows];
-    newRows[index].isEditing = true; // Mark the row as being edited
-
-    // Store original row data if not already stored
-    const originalRowData = [...originalRows];
-    originalRowData[index] = { ...newRows[index] }; // Store a copy of the row before editing
-    setOriginalRows(originalRowData);
-
-    setFilteredRows(newRows);
+    const employee = filterRows[index];
+    // navigate("/employee/edit", { state: { employee } });
   };
 
   // Function to cancel editing (restore original data)
@@ -329,11 +320,10 @@ const AllEmployee = () => {
     setFilteredRows(newRows);
   };
 
-  const handleView = (employeeId) => {
-    // navigate to view page
-    console.log(employeeId);
+  const handleView = (index) => {
+    const employee = filteredRows[index];
 
-    navigate("/employees/view", { state: { employeeId } });
+    navigate("/employees/view", { state: { employee } });
   };
 
   return (
@@ -601,7 +591,7 @@ const AllEmployee = () => {
                         <div className="flex justify-center items-center">
                           <button
                             className="p-1 mr-2 text-black w-8 h-8 flex justify-center items-center transition-colors duration-300 hover:bg-gray-400"
-                            onClick={() => handleView(row.id)}
+                            onClick={() => handleView(index)}
                           >
                             <FaRegEye className="text-lg" />
                           </button>
