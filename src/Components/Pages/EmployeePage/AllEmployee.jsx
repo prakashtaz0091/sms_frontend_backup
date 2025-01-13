@@ -198,7 +198,7 @@ const AllEmployee = () => {
   // Function to handle edit
   const handleEdit = (index) => {
     const employee = filteredRows[index];
-    // navigate("/employee/edit", { state: { employee } });
+    navigate("/employees/edit", { state: { employee } });
   };
 
   // Function to cancel editing (restore original data)
@@ -321,7 +321,9 @@ const AllEmployee = () => {
   const handleView = (index) => {
     const employee = filteredRows[index];
 
-    navigate("/employees/view", { state: { employee } });
+    navigate("/employees/view", {
+      state: { employee },
+    });
   };
 
   return (
