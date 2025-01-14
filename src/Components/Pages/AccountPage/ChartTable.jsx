@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { RiDeleteBin6Line } from "react-icons/ri";
 import { IoIosArrowDropleft, IoIosArrowDropright } from "react-icons/io";
 
-const Table = ({ rows = [], onDelete }) => {
+const Table = ({ rows = [], handleDelete }) => {
   useEffect(() => {
     setPagination({
       ...pagination,
@@ -77,7 +77,7 @@ const Table = ({ rows = [], onDelete }) => {
                   <td className="p-2 text-center">
                     <button
                       className="p-1 text-black transition-colors duration-300 hover:bg-red-600 hover:text-white"
-                      onClick={() => onDelete(row.id)}
+                      onClick={() => handleDelete(row.id)}
                     >
                       <RiDeleteBin6Line className="hover:text-lg" />
                     </button>

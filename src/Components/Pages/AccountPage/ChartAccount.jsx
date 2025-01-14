@@ -10,11 +10,23 @@ const ChartAccount = () => {
   const [rows, setRows] = useState([]);
   const [filteredRows, setFilteredRows] = useState([]);
   const [allRows, setAllRows] = useState([]);
+  const [selectedFilter, setSelectedFilter] = useState("");
   const [searchTerm, setSearchTerm] = useState(""); // For search functionality
   const [newHead, setNewHead] = useState("");
   const [newType, setNewType] = useState("");
+  const [showFilterOptions, setShowFilterOptions] = useState(false);
 
   const { api } = useContext(AuthContext);
+
+  useEffect(() => {
+    if (selectedFilter !== "") {
+      if (selectedFilter === "income") {
+        setFilteredRows(allRows.filter((row) => row.type === "income"));
+      } else if (selectedFilter === "expense") {
+        setFilteredRows(allRows.filter((row) => row.type === "expense"));
+      }
+    }
+  }, [selectedFilter]);
 
   useEffect(() => {
     const getChartOfAccounts = async () => {
@@ -32,12 +44,10 @@ const ChartAccount = () => {
 
   // Function to handle search
   const handleSearch = (e) => {
-    const value = e.target.value.toLowerCase();
-    setSearchTerm(value);
     const filtered = rows.filter(
       (row) =>
-        row.head.toLowerCase().includes(value) ||
-        row.type.toLowerCase().includes(value)
+        row.head.toLowerCase().includes(searchTerm) ||
+        row.type.toLowerCase().includes(searchTerm)
     );
     setFilteredRows(filtered);
   };
@@ -46,11 +56,16 @@ const ChartAccount = () => {
   const handleRefresh = () => {
     setFilteredRows(rows);
     setSearchTerm(""); // Clear search term
+    setSelectedFilter("");
   };
 
   // Function to handle delete
   const handleDelete = (id) => {
-    const confirmDelete = window.confirm("Are you sure you want to delete this item?");
+    console.log(id);
+
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete this item?"
+    );
     if (confirmDelete) {
       const newRows = rows.filter((row) => row.id !== id);
       setRows(newRows);
@@ -66,8 +81,6 @@ const ChartAccount = () => {
       }
     };
     deleteChartOfAccount();
-
-
   };
 
   // Function to add a new chart of account
@@ -79,12 +92,12 @@ const ChartAccount = () => {
         head: newHead,
         type: newType,
       };
-      const newRows = [newRow, ...rows ];
+      const newRows = [newRow, ...rows];
       setRows(newRows);
+      setAllRows(newRows);
       setFilteredRows(newRows);
       setNewHead(""); // Reset the form
       setNewType("");
-
 
       const addChartOfAccount = async () => {
         try {
@@ -95,9 +108,6 @@ const ChartAccount = () => {
         }
       };
       addChartOfAccount();
-
-
-
     }
   };
 
@@ -117,8 +127,10 @@ const ChartAccount = () => {
       </div>
 
       <div className="flex flex-row justify-between gap-4">
-        <div className="w-2/3 mt-10 flex flex-col bg-white shadow-md rounded-2xl items-center h-2/3">
-          <h3 className="mb-8 text-2xl font-semibold flex mt-10">Add Chart of Account</h3>
+        <div className="w-2/5 mt-10 flex flex-col bg-white shadow-md rounded-2xl items-center h-2/3">
+          <h3 className="mb-8 text-2xl font-semibold flex mt-10">
+            Add Chart of Account
+          </h3>
           <input
             type="text"
             className="p-2 px-4 mb-4 rounded-3xl placeholder-black border border-blue-500 w-2/3"
@@ -146,32 +158,73 @@ const ChartAccount = () => {
           </button>
         </div>
 
-        {/* Search Bar */}
-        <div className="flex flex-col w-full">
-          <div className="flex flex-row gap-4 py-10 justify-end">
-            <div className="flex items-center bg-white rounded-full">
-              <IoFilterSharp className="text-gray-600 ml-4" size={24} />
-              <div className="w-px h-6 bg-gray-600 mx-4"></div>
-              <input
-                type="text"
-                placeholder="Search"
-                value={searchTerm}
-                onChange={handleSearch}
-                className="py-2 text-gray-600 placeholder-gray-500 bg-transparent focus:outline-none"
-              />
-              <IoSearch
-                className="text-gray-600 mr-4 cursor-pointer transition-colors duration-300 hover:text-blue-500"
-                size={24}
-              />
+        <div className="w-3/5 flex flex-col gap-4 py-10 justify-end">
+          {/* Search Bar */}
+          <div className="flex flex-row gap-4 justify-end items-center py-10">
+            <div className="relative">
+              <div className="flex items-center  bg-white rounded-full ">
+                {/* Left Side: Three-Line Menu Icon */}
+                <IoFilterSharp
+                  className="text-gray-600 ml-4 cursor-pointer"
+                  size={24}
+                  onClick={() => setShowFilterOptions((prev) => !prev)} // Trigger filter on click
+                />
+                {/* Vertical Line Divider */}
+                <div className="w-px h-6 bg-gray-600 mx-4"></div>
+
+                {/* Input Field */}
+                <input
+                  type="text"
+                  placeholder="Search"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="flex-grow px-4 py-2 text-gray-600 placeholder-gray-500 bg-transparent focus:outline-none"
+                />
+                <IoSearch
+                  className="text-gray-600 mr-4 cursor-pointer transition-colors duration-300 hover:text-blue-500"
+                  size={24}
+                  onClick={handleSearch} // Trigger search on click
+                />
+              </div>
+              {showFilterOptions && (
+                <div className="absolute top-[-30px] left-[-155px]">
+                  {/* Tooltip container */}
+                  <div className="relative bg-white border border-gray-300 p-2 rounded-lg shadow-lg w-40">
+                    {/* Filter Options */}
+
+                    {/* Filter Options */}
+                    <div
+                      className="p-2 cursor-pointer hover:bg-gray-200"
+                      onClick={() => {
+                        setSelectedFilter("income");
+                        setShowFilterOptions(false);
+                        setSearchTerm("");
+                      }}
+                    >
+                      Income
+                    </div>
+                    <div
+                      className="p-2 cursor-pointer hover:bg-gray-200"
+                      onClick={() => {
+                        setSelectedFilter("expense");
+                        setShowFilterOptions(false);
+                        setSearchTerm("");
+                      }}
+                    >
+                      Expense
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
             <div
-              className="bg-white p-3 rounded-full border border-[#BCA8EA] cursor-pointer hover:bg-[#BCA8EA] hover:text-white transition-colors duration-100"
+              className="border border-[#BCA8EA] p-2 rounded-full bg-white cursor-pointer hover:bg-[#BCA8EA] hover:text-white transition-colors duration-100"
               onClick={handleRefresh}
             >
               <FiRefreshCcw />
             </div>
           </div>
-          <Table rows={filteredRows || []} onDelete={handleDelete} />
+          <Table rows={filteredRows || []} handleDelete={handleDelete} />
         </div>
       </div>
     </div>
