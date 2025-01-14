@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { MdAccountBalanceWallet } from "react-icons/md";
 import { IoSearch } from "react-icons/io5";
 import { FiRefreshCcw } from "react-icons/fi";
@@ -13,7 +13,8 @@ const Statement = () => {
   const [fromDate, setFromDate] = useState(""); // Store from date
   const [toDate, setToDate] = useState(""); // Store to date
   const [filterType, setFilterType] = useState("all"); // To track "This Month" or "All" filter
-
+  const [showFilterOptions, setShowFilterOptions] = useState(false);
+  const [selectedFilter, setSelectedFilter] = useState("");
   const [pagination, setPagination] = useState({
     currentPage: 1,
     recordsPerPage: 10,
@@ -157,7 +158,7 @@ const Statement = () => {
           </span>
         </div>
 
-        <div className="flex flex-row space-x-4 items-center">
+        <div className="relative flex flex-row space-x-4 items-center">
           {/* Print Button */}
           <button
             onClick={handlePrint}
@@ -166,7 +167,11 @@ const Statement = () => {
             <MdLocalPrintshop size={24} className="text-black " />
           </button>
           <button className="bg-gray-500  px-2 py-2 rounded-md transition duration-300 hover:bg-gray-600 hover:shadow-lg hover:scale-105">
-            <IoFilterSharp className="text-white " size={24} />
+            <IoFilterSharp
+              className="text-white "
+              size={24}
+              onClick={() => setShowFilterOptions((prev) => !prev)} // Trigger filter on click
+            />
           </button>
 
           <button
@@ -175,6 +180,34 @@ const Statement = () => {
           >
             <FiRefreshCcw size={24} className="text-gray-600 " />
           </button>
+          {showFilterOptions && (
+            <div className="absolute left-[-120px]">
+              {/* Tooltip container */}
+              <div className="relative bg-white border border-gray-300 p-2 rounded-lg shadow-lg w-40">
+                {/* Filter Options */}
+
+                {/* Filter Options */}
+                <div
+                  className="p-2 cursor-pointer hover:bg-gray-200"
+                  onClick={() => {
+                    setSelectedFilter("income");
+                    setShowFilterOptions(false);
+                  }}
+                >
+                  Income
+                </div>
+                <div
+                  className="p-2 cursor-pointer hover:bg-gray-200"
+                  onClick={() => {
+                    setSelectedFilter("expense");
+                    setShowFilterOptions(false);
+                  }}
+                >
+                  Expense
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
@@ -185,6 +218,7 @@ const Statement = () => {
           toDate={toDate}
           pagination={pagination}
           setPagination={setPagination}
+          selectedFilter={selectedFilter}
         />
       </div>
 

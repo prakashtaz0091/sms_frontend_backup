@@ -36,10 +36,26 @@ const StatementTable = ({
   toDate,
   pagination,
   setPagination,
+  selectedFilter,
 }) => {
   const { api } = useContext(AuthContext);
 
   const [incomeExpenses, setIncomeExpenses] = useState([]);
+  const [filteredIncomeExpenses, setFilteredIncomeExpenses] = useState([]);
+
+  useEffect(() => {
+    if (selectedFilter !== "") {
+      if (selectedFilter === "income") {
+        setFilteredIncomeExpenses(
+          incomeExpenses.filter((row) => row.head_type === "income")
+        );
+      } else if (selectedFilter === "expense") {
+        setFilteredIncomeExpenses(
+          incomeExpenses.filter((row) => row.head_type === "expense")
+        );
+      }
+    }
+  }, [selectedFilter]);
 
   useEffect(() => {
     const getIncomeExpenses = async () => {
@@ -89,7 +105,6 @@ const StatementTable = ({
   }, [pagination]);
 
   // Filter the data based on filterType
-  const [filteredIncomeExpenses, setFilteredIncomeExpenses] = useState([]);
   useEffect(() => {
     const filteredData = filterExpenses(
       incomeExpenses,
