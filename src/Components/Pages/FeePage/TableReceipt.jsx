@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useContext } from "react";
 import { AuthContext } from "../../../context/AuthContext";
 import { parseJSON } from "date-fns";
-
+import { useNavigate } from "react-router-dom";
 function TableReceipt({
   searchQuery,
   filterOption,
@@ -18,12 +18,16 @@ function TableReceipt({
   const [concessionPercent, setConcessionPercent] = useState(0);
   const [paymentMode, setPaymentMode] = useState("Cash");
   const [remarks, setRemarks] = useState("");
+  const navigate = useNavigate();
 
   useEffect(() => {
     const getMonths = async () => {
       try {
         const response = await api.get("/get_months/");
-
+        if (response.data.length < 12) {
+          alert("Please ask the administrator to add months");
+          navigate("/fees/feeReport");
+        }
         setMonths(response.data);
       } catch (error) {
         console.error("Error fetching months:", error);
@@ -35,14 +39,29 @@ function TableReceipt({
   useEffect(() => {
     let temp = [];
     Object.entries(student_for_receipt).forEach(([key, value]) => {
-      if (key === "id" || key === "monthly_fee") return;
+      if (
+        key === "id" ||
+        key === "monthly_fee" ||
+        key === "old_fees" ||
+        key === "paid_months"
+      )
+        return;
 
       temp.push({ label: key.replace("_", " "), value: value });
     });
-    // console.log(student_for_receipt);
 
     setStudentInfo(temp);
     setFeePerMonth(student_for_receipt.monthly_fee);
+    setOldBalance(student_for_receipt.old_fees);
+    // console.log(student_for_receipt);
+
+    const temp_months = months.filter(
+      (month) =>
+        !student_for_receipt.paid_months.some(
+          (paid_month) => paid_month.id == month.id
+        )
+    );
+    setMonths(temp_months);
   }, [student_for_receipt]);
 
   const [selectedMonths, setSelectedMonths] = useState([]);
@@ -52,7 +71,7 @@ function TableReceipt({
   const [transportFee, setTransportFee] = useState(250);
   const [lateFee, setLateFee] = useState(100);
 
-  const oldBalance = 2000;
+  const [oldBalance, setOldBalance] = useState(0);
   const [deposit, setDeposit] = useState(0);
 
   const handleMonthSelection = (month) => {
@@ -103,10 +122,15 @@ function TableReceipt({
         remarks: remarks,
       };
 
+      if (receiptData.deposit_fees > receiptData.net_fees) {
+        alert("Deposit fees is more than net fees. Just pay net fees");
+        return;
+      }
       const response = await api.post("/create_receipt/", receiptData);
       console.log(response.data);
       alert(response.data.message);
 
+      navigate("/fees/feeReport");
       //reset
       get_new_receipt_no();
       setSelectedMonths([]);
@@ -127,22 +151,28 @@ function TableReceipt({
     <div className="bg-pink-100">
       <div className="grid grid-cols-2 gap-4 mb-8">
         <div className="grid grid-cols-2 gap-4">
-          {studentInfo ? (
-            studentInfo.map((info, index) => (
-              <div key={index} className="text-center">
-                <p className="font-bold">{info.label}</p>
-                <div className="bg-gray-200 p-2 rounded-3xl border border-gray-300">
-                  <p>{info.value}</p>
+          {Object.keys(student_for_receipt).length > 0 ? (
+            studentInfo ? (
+              studentInfo.map((info, index) => (
+                <div key={index} className="text-center">
+                  <p className="font-bold">{info.label}</p>
+                  <div className="bg-gray-200 p-2 rounded-3xl border border-gray-300">
+                    <p>{info.value}</p>
+                  </div>
                 </div>
-              </div>
-            ))
+              ))
+            ) : (
+              <div>loading...</div>
+            )
           ) : (
-            <div>loading...</div>
+            <div className="flex justify-center items-center text-gray-600 text-center col-span-2">
+              Please Select a student using enrollment ID
+            </div>
           )}
         </div>
 
         <div className="grid grid-cols-3 gap-4">
-          <h2 className="col-span-3 text-center font-bold">Month</h2>
+          <h2 className="col-span-3 text-center font-bold">Months</h2>
           <div className="col-span-3 p-6 bg-white rounded-lg">
             <div className="overflow-x-auto">
               <div className="flex mt-4" style={{ minWidth: "800px" }}>

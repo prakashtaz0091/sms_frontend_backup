@@ -4,6 +4,7 @@ import SearchBar from "./SearchBar";
 import TableReceipt from "./TableReceipt";
 import { AuthContext } from "../../../context/AuthContext";
 import { get } from "jquery";
+import { IoSearch } from "react-icons/io5";
 
 const FeeReceipt = () => {
   const [receiptNo, setReceiptNo] = useState("");
@@ -91,14 +92,21 @@ const FeeReceipt = () => {
                 className="rounded-3xl p-2 w-full md:w-44 border border-gray-400"
               />
             </div>
-            <div className="flex flex-col items-center">
-              <label className="font-bold">Enrollment ID</label>
-              <input
-                type="text"
-                value={enrNo}
-                onChange={(e) => setEnrNo(e.target.value.trim())}
-                className="rounded-3xl p-2 w-full md:w-44 border border-gray-400"
-                onBlur={get_student_for_receipt}
+            <div className="flex  items-center">
+              <div className="flex flex-col items-center">
+                <label className="font-bold">Enrollment ID</label>
+                <input
+                  type="text"
+                  value={enrNo}
+                  onChange={(e) => setEnrNo(e.target.value.trim())}
+                  className="rounded-3xl p-2 w-full md:w-44 border border-gray-400"
+                />
+              </div>
+
+              <IoSearch
+                className="text-gray-600 mr-4 cursor-pointer transition-colors duration-300 hover:text-blue-500"
+                size={24}
+                onClick={get_student_for_receipt}
               />
             </div>
           </div>
