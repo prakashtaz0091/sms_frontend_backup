@@ -99,51 +99,55 @@ function TableReceipt({
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    alert("Are you sure you want to create the receipt.");
-    try {
-      const receiptData = {
-        receipt_no: receiptNo,
-        receipt_date: date.toISOString().split("T")[0],
-        student: student_for_receipt.id,
-        months: selectedMonths,
-        admission_fees: admissionFee,
-        registration_fees: registrationFee,
-        fines: fine,
-        transport_fees: transportFee,
-        late_fees: lateFee,
-        old_fees: oldBalance,
-        deposit_fees: parseInt(deposit),
-        total_fees: totalFees,
-        concession_percentage: parseFloat(concessionPercent),
-        concession_amount: concessionAmount,
-        net_fees: netFees,
-        remaining_fees: balanceAmount,
-        payment_mode: paymentMode,
-        remarks: remarks,
-      };
+    const confirmSubmit = window.confirm(
+      "Are you sure you want to create the receipt."
+    );
+    if (confirmSubmit) {
+      try {
+        const receiptData = {
+          receipt_no: receiptNo,
+          receipt_date: date.toISOString().split("T")[0],
+          student: student_for_receipt.id,
+          months: selectedMonths,
+          admission_fees: admissionFee,
+          registration_fees: registrationFee,
+          fines: fine,
+          transport_fees: transportFee,
+          late_fees: lateFee,
+          old_fees: oldBalance,
+          deposit_fees: parseInt(deposit),
+          total_fees: totalFees,
+          concession_percentage: parseFloat(concessionPercent),
+          concession_amount: concessionAmount,
+          net_fees: netFees,
+          remaining_fees: balanceAmount,
+          payment_mode: paymentMode,
+          remarks: remarks,
+        };
 
-      if (receiptData.deposit_fees > receiptData.net_fees) {
-        alert("Deposit fees is more than net fees. Just pay net fees");
-        return;
+        if (receiptData.deposit_fees > receiptData.net_fees) {
+          alert("Deposit fees is more than net fees. Just pay net fees");
+          return;
+        }
+        const response = await api.post("/create_receipt/", receiptData);
+        console.log(response.data);
+        alert(response.data.message);
+
+        navigate("/fees/feeReport");
+        //reset
+        get_new_receipt_no();
+        setSelectedMonths([]);
+        setAdmissionFee(1500);
+        setRegistrationFee(1000);
+        setFine(0);
+        setTransportFee(250);
+        setLateFee(100);
+        setDeposit(0);
+        setPaymentMode("Cash");
+        setRemarks("");
+      } catch (error) {
+        console.error("Error adding receipt:", error);
       }
-      const response = await api.post("/create_receipt/", receiptData);
-      console.log(response.data);
-      alert(response.data.message);
-
-      navigate("/fees/feeReport");
-      //reset
-      get_new_receipt_no();
-      setSelectedMonths([]);
-      setAdmissionFee(1500);
-      setRegistrationFee(1000);
-      setFine(0);
-      setTransportFee(250);
-      setLateFee(100);
-      setDeposit(0);
-      setPaymentMode("Cash");
-      setRemarks("");
-    } catch (error) {
-      console.error("Error adding receipt:", error);
     }
   };
 

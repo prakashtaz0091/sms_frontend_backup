@@ -39,6 +39,8 @@ const FeeReport = () => {
     const getAllReceipts = async () => {
       try {
         const response = await api.get("/get_receipts/");
+        // console.log(response.data);
+
         setInitialRows(response.data);
         setRows(response.data);
       } catch (error) {
@@ -289,7 +291,7 @@ const FeeReport = () => {
 
                     "Remaining Fee",
                     "Paid",
-                    "Remark",
+                    "Description",
                   ].map((header, index) => (
                     <th
                       key={index}
@@ -329,7 +331,14 @@ const FeeReport = () => {
                       <td className="p-2 text-center ">
                         {row.paid} of {row.netFees}
                       </td>
-                      <td className="p-2 text-center ">{row.remarks}</td>
+                      <td className="p-2 text-center ">
+                        monthly fees paid for{" "}
+                        {row.months.length === 1 && row.months[0]}
+                        {row.months.slice(0, -1).join(", ")}
+                        {row.months.length > 1
+                          ? ` and ${row.months[row.months.length - 1]}`
+                          : ""}
+                      </td>
                     </tr>
                   ))
                 ) : (
