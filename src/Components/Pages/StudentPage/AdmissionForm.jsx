@@ -1,8 +1,7 @@
 import React, { useState, useRef, useContext, useEffect } from "react";
 import { MdOutlineFileUpload } from "react-icons/md";
 import { FaUser } from "react-icons/fa";
-import StateDistrictSelect from "../SignUp&SignIn/StatesDistricts";
-import axios from "axios";
+
 import { AuthContext } from "../../../context/AuthContext";
 import satesDistrictsJSON from "../SignUp&SignIn/statesDistricts.json";
 import { useNavigate } from "react-router-dom";

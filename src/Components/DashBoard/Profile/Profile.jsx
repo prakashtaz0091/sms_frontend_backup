@@ -6,6 +6,8 @@ import { FaRegUserCircle } from "react-icons/fa";
 import { AuthContext } from "../../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { set } from "date-fns";
+import satesDistrictsJSON from "../../Pages/SignUp&SignIn/statesDistricts.json";
+import { use } from "react";
 
 const base_url = import.meta.env.VITE_API_BASE_URL;
 // Reusable Input Component
@@ -21,18 +23,21 @@ const InputField = ({ label, placeholder, type = "text" }) => (
 );
 
 // Reusable Select Component
-const SelectField = ({ label, options }) => (
-  <div className="flex flex-col">
-    <p className="text-center">{label}</p>
-    <select className="p-2 rounded-full bg-white">
-      {options.map((option, index) => (
-        <option key={index} value={option}>
-          {option}
-        </option>
-      ))}
-    </select>
-  </div>
-);
+// const SelectField = ({ label, options }) => (
+//   <div className="flex flex-col">
+//     <p className="text-center">{label}</p>
+//     <select className="p-2 rounded-full bg-white" value={ }
+//       onChange={(e) => setSelectedOption(e.target.value)}
+
+//     >
+//       {options.map((option, index) => (
+//         <option key={index} value={option}>
+//           {option}
+//         </option>
+//       ))}
+//     </select>
+//   </div>
+// );
 
 // Reusable Contact Info Component
 const ContactInfo = ({ Icon, label, info }) => (
@@ -45,13 +50,24 @@ const ContactInfo = ({ Icon, label, info }) => (
   </div>
 );
 
+function getStates(jsonData) {
+  return jsonData.states.map((stateObj) => stateObj.state);
+}
+function getDistrictsByState(jsonData, stateName) {
+  const stateObj = jsonData.states.find(
+    (stateObj) => stateObj.state === stateName
+  );
+  return stateObj ? stateObj.districts : []; // Return districts or empty array if state not found
+}
+
 const Profile = () => {
   const { api } = useContext(AuthContext);
   const navigate = useNavigate();
   // Define options for select fields
-  const districts = ["Hojai", "Nagaon", "Guwahati"];
-  const states = ["Assam", "Meghalaya", "West Bengal"];
-  const countries = ["India", "Bangladesh", "Nepal"];
+
+  const countries = ["India"];
+  const [states, setStates] = useState(getStates(satesDistrictsJSON));
+  const [districts, setDistricts] = useState([]);
 
   const [logoFile, setLogoFile] = useState(null);
   const [schoolName, setSchoolName] = useState("");
@@ -74,10 +90,18 @@ const Profile = () => {
     phone: "",
     email: "",
   });
+
+  useEffect(() => {
+    setStates(getStates(satesDistrictsJSON));
+  }, []);
+  useEffect(() => {
+    setDistricts(getDistrictsByState(satesDistrictsJSON, state));
+  }, [states]);
+
   useEffect(() => {
     const getSchoolData = async () => {
       try {
-        const response = await api.get("/school/");
+        const response = await api.get("/school_info/");
         // console.log(response.data);
         const school_data = response.data.school;
         const admin_user = response.data.admin;
@@ -211,12 +235,19 @@ const Profile = () => {
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
               />
-              <SelectField
-                label="School Board"
-                options={["CBSE", "NEB", "SEE"]}
-                value={schoolBoard}
-                onChange={(e) => setSchoolBoard(e.target.value)}
-              />
+              <div className="flex flex-col">
+                <p className="text-center">States</p>
+                <select className="p-2 rounded-full bg-white" value={countries}
+                  onChange={(e) => setCountry(e.target.value)}
+
+                >
+                  {countries.map((option, index) => (
+                    <option key={index} value={option}>
+                      {option}
+                    </option>
+                  ))}
+                </select>
+              </div>
               <InputField
                 label="Town/Village/City"
                 placeholder={townCity}
@@ -235,24 +266,46 @@ const Profile = () => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
-            <SelectField
-              label="District"
-              options={districts}
-              value={district}
-              onChange={(e) => setDistrict(e.target.value)}
-            />
-            <SelectField
-              label="State"
-              options={states}
-              value={state}
-              onChange={(e) => setState(e.target.value)}
-            />
-            <SelectField
-              label="Country"
-              options={countries}
-              value={country}
-              onChange={(e) => setCountry(e.target.value)}
-            />
+
+            <div className="flex flex-col">
+              <p className="text-center">States</p>
+              <select className="p-2 rounded-full bg-white" value={countries}
+                onChange={(e) => setCountry(e.target.value)}
+
+              >
+                {countries.map((option, index) => (
+                  <option key={index} value={option}>
+                    {option}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="flex flex-col">
+              <p className="text-center">States</p>
+              <select className="p-2 rounded-full bg-white" value={state}
+                onChange={(e) => setState(e.target.value)}
+
+              >
+                {states.map((option, index) => (
+                  <option key={index} value={option}>
+                    {option}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="flex flex-col">
+              <p className="text-center">States</p>
+              <select className="p-2 rounded-full bg-white" value={district}
+                onChange={(e) => setDistrict(e.target.value)}
+
+              >
+                {districts.map((option, index) => (
+                  <option key={index} value={option}>
+                    {option}
+                  </option>
+                ))}
+              </select>
+            </div>
             <InputField
               label="Pin Code"
               placeholder={pinCode}
