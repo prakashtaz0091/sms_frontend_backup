@@ -158,12 +158,8 @@ function AddEmployee() {
     return stateObj ? stateObj.districts : []; // Return districts or empty array if state not found
   }
 
-  const handleSubmit = async (values, { resetForm }) => {
-    // // Log the form values
-    // console.log("Form Submitted successfully");
-    // console.log("Form Data", values);
+  const handleSubmit = async (values,) => {
 
-    // Reset the form after successful submission
     // Manually reset the file input
     if (fileInputRef1.current) {
       fileInputRef1.current.value = null; // Reset the file input field
@@ -180,9 +176,9 @@ function AddEmployee() {
 
     const updatedValues = {
       ...values,
-      complementarySubjects: values.complementarySubjects.map((value) =>
+      complementarySubjects: values.complementarySubjects && values.complementarySubjects.map((value) =>
         parseInt(value, 10)
-      ),
+      ) || [],
       mainSubject: parseInt(values.mainSubject, 10),
       selectRole: parseInt(values.selectRole, 10),
     };
@@ -199,10 +195,8 @@ function AddEmployee() {
       const response = await api.post(`/employee/`, FORMDATA);
       // console.log(response.data);
       alert("Employee added successfully!");
-      resetForm();
     } catch (error) {
-      // console.error("Failed ", error.response);
-      // Handle error (e.g., show a notification)
+
     }
   };
 

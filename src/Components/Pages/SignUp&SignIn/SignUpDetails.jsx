@@ -183,6 +183,7 @@ const SignUpDetails = () => {
 
       if (response.ok) {
         console.log("Signup successful", schoolData);
+        alert("Signup Successful");
       } else {
         console.log("School Creation failed", schoolData);
       }
@@ -191,8 +192,9 @@ const SignUpDetails = () => {
 
     } else {
       console.log("Signup failed", data);
+      alert("Signup failed");
 
-      throw new Error("Signup failed");
+      // throw new Error("Signup failed");
     }
   };
 
