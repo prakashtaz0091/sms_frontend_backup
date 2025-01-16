@@ -11,7 +11,7 @@ import { sub } from "date-fns";
 function EditEmployee() {
   const navigate = useNavigate();
   const location = useLocation();
-  const [employee, setEmployee] = useState(location.state.employee || {});
+  const [employee, setEmployee] = useState(location.state?.employee || {});
 
   const { api } = useContext(AuthContext);
   const [roles, setRoles] = useState([]);
@@ -1011,7 +1011,7 @@ function EditEmployee() {
                 <button
                   type="submit"
                   className="bg-pink-500 text-white font-semibold px-6 py-2 rounded-3xl shadow-md hover:bg-pink-600"
-                  // onClick={(e) => handleSubmit(e)}
+                // onClick={(e) => handleSubmit(e)}
                 >
                   Submit
                 </button>
