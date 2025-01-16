@@ -118,7 +118,11 @@ function EditEmployee() {
 
     const FORMDATA = new FormData(e.target);
     let temp = [];
+
+
     for (const pair of FORMDATA.entries()) {
+      console.log(pair);
+
       if (pair[0] === "complementarySubjects") {
         temp.push(parseInt(pair[1], 10));
       }
@@ -268,6 +272,7 @@ function EditEmployee() {
                     ref={fileInputRef1}
                     style={{ display: "none" }}
                     accept="image/*" // Accept only image files
+                    name="photoUpload"
                     onChange={(event) =>
                       handleUploadClick1(event, setFieldValue)
                     }
