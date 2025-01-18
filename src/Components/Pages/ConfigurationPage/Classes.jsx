@@ -149,6 +149,10 @@ const Classes = () => {
       formData.append("className", needToUpdateRow.className);
       formData.append("class_teacher", needToUpdateRow.class_teacher);
       formData.append("monthlyFees", needToUpdateRow.monthlyFees);
+      formData.append("id", needToUpdateRow.id);
+      // console.log("needToUpdateRow", needToUpdateRow.id);
+      // console.log("needToUpdateRow", needToUpdateRow.class_teacher);
+
       api
         .patch(`/class/${needToUpdateRow.id}/`, formData)
         .then((response) => {
