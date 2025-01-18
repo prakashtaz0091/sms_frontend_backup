@@ -17,6 +17,21 @@ const StudentTable = () => {
     totalRecords: 0,
     totalPages: 1,
   });
+  const [roles, setRoles] = useState([]);
+  useEffect(() => {
+    const getRoles = async () => {
+      try {
+        const response = await api.get("/get_roles/");
+        setRoles(response.data);
+      } catch (error) {
+        alert("Roles not found");
+        // console.error("Error fetching roles:", error);
+      }
+    }
+    getRoles();
+
+
+  }, [])
 
   const [year, setYear] = useState("");
   const [month, setMonth] = useState("");
@@ -130,10 +145,10 @@ const StudentTable = () => {
       pagination.totalRecords == 0
         ? 0
         : pagination.currentPage * pagination.recordsPerPage -
-          pagination.recordsPerPage;
+        pagination.recordsPerPage;
     let endIndex =
       pagination.currentPage * pagination.recordsPerPage >
-      pagination.totalRecords
+        pagination.totalRecords
         ? pagination.totalRecords
         : pagination.currentPage * pagination.recordsPerPage;
 
@@ -388,7 +403,7 @@ const StudentTable = () => {
                   >
                     <td className="p-2 text-center">{employee.employeeId}</td>
                     <td className="p-2 text-center">{employee.name}</td>
-                    <td className="p-2 text-center">{employee.role}</td>
+                    <td className="p-2 text-center">{roles && roles.find(role => role.id == employee.role)?.name || "No Role"}</td>
                     <td className="p-2">
                       <div
                         ref={(el) => (attendanceScrollRefs.current[index] = el)}
@@ -460,10 +475,10 @@ const StudentTable = () => {
             {pagination.totalRecords == 0
               ? 0
               : pagination.currentPage * pagination.recordsPerPage -
-                (pagination.recordsPerPage - 1)}{" "}
+              (pagination.recordsPerPage - 1)}{" "}
             &nbsp; to &nbsp;
             {pagination.currentPage * pagination.recordsPerPage >
-            pagination.totalRecords
+              pagination.totalRecords
               ? pagination.totalRecords
               : pagination.currentPage * pagination.recordsPerPage}{" "}
             &nbsp; of {pagination.totalRecords} records
