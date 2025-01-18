@@ -76,9 +76,6 @@ const Classes = () => {
       };
       // console.log(newClass);
 
-      setRows((prevRows) => [...prevRows, newClass]);
-      setFilteredRows((prevRows) => [...prevRows, newClass]); // Update filtered rows
-
       setClassName("");
       setMonthlyFees("");
       setClassTeacherID("");
@@ -91,41 +88,49 @@ const Classes = () => {
       formData.append("class_teacher", classTeacherID);
       formData.append("monthlyFees", monthlyFees);
       // formData.append("id", monthlyFees);
-      api
-        .post("/class/", formData)
-        .then((response) => {
-          // console.log(response);
-          alert("Class added successfully");
-        })
-        .catch((error) => {
-          // console.log(error);
-          alert("Something went wrong");
-        });
+
+      const createClass = async () => {
+        try {
+          const response = await api.post("/class/", formData);
+          console.log(response.data);
+
+          setRows((prevRows) => [...prevRows, newClass]);
+          setFilteredRows((prevRows) => [...prevRows, newClass]); // Update filtered rows
+
+        } catch (error) {
+          alert(error.response.data.message);
+        }
+      }
+      createClass();
     }
   };
 
   const handleEditClass = (index) => {
     // Find the original index in the `rows` array using the class name and teacher (since rows may be filtered)
-    const originalIndex = rows.findIndex(
-      (row) =>
-        row.class === filteredRows[index].class &&
-        row.class_teacher === filteredRows[index].class_teacher &&
-        row.monthlyFees === filteredRows[index].monthlyFees
-    );
+    // console.log(filteredRows[index]);
+
+    // const originalIndex = rows.findIndex(
+    //   (row) =>
+    //     row.class === filteredRows[index].class &&
+    //     row.class_teacher === filteredRows[index].class_teacher &&
+    //     row.monthlyFees === filteredRows[index].monthlyFees
+    // );
     // console.log(rows, "org index", originalIndex);
 
-    if (originalIndex >= 0) {
-      const rowToEdit = rows[originalIndex];
-      setClassName(rowToEdit.className);
-      setMonthlyFees(rowToEdit.monthlyFees);
-      setClassTeacherID(rowToEdit.class_teacher);
-      setEditIndex(originalIndex); // Store the original index, not the filtered one
-    }
+    // if (originalIndex >= 0) {
+    const rowToEdit = filteredRows[index];
+    // console.log(rowToEdit);
+
+    setClassName(rowToEdit.className);
+    setMonthlyFees(rowToEdit.monthlyFees);
+    setClassTeacherID(rowToEdit.class_teacher);
+    setEditIndex(index); // Store the original index, not the filtered one
+    // }
   };
 
   const handleSaveEdit = () => {
     if (editIndex >= 0) {
-      const updatedRows = rows.map((row, index) => {
+      const updatedRows = filteredRows.map((row, index) => {
         if (index === editIndex) {
           return {
             ...row,
@@ -137,11 +142,9 @@ const Classes = () => {
         }
         return row;
       });
-      // console.log(updatedRows[editIndex]);
       const needToUpdateRow = updatedRows[editIndex];
 
-      setRows(updatedRows);
-      setFilteredRows(updatedRows); // Update filtered rows as well
+
       setEditIndex(-1);
       setClassName("");
       setMonthlyFees("");
@@ -152,37 +155,42 @@ const Classes = () => {
       formData.append("className", needToUpdateRow.className);
       formData.append("class_teacher", needToUpdateRow.class_teacher);
       formData.append("monthlyFees", needToUpdateRow.monthlyFees);
-      formData.append("id", needToUpdateRow.id);
+      // formData.append("id", needToUpdateRow.id);
       // console.log("needToUpdateRow", needToUpdateRow.id);
       // console.log("needToUpdateRow", needToUpdateRow.class_teacher);
 
-      api
-        .patch(`/class/${needToUpdateRow.id}/`, formData)
-        .then((response) => {
+      const updateClass = async () => {
+        try {
+          const response = await api.put(`/class/${needToUpdateRow.id}/`, formData);
           // console.log(response);
-          alert("Class updated successfully");
-        })
-        .catch((error) => {
-          alert("Failed to update class");
-        });
+          setFilteredRows(updatedRows); // Update filtered rows as well
+          alert("Class Updated successfully")
+        } catch (error) {
+          // console.log(error);
+          alert("Class update failed.");
+        }
+      }
+      updateClass()
     }
   };
 
-  const handleDeleteClass = (index) => {
+  const handleDeleteClass = (id) => {
     // Find the original index in the `rows` array
     const confirmDelete = window.confirm(
       "Are you sure you want to delete this item?"
     );
     if (confirmDelete) {
-      const originalIndex = rows.findIndex(
-        (row) =>
-          row.className === filteredRows[index].className &&
-          row.class_teacher === filteredRows[index].class_teacher &&
-          row.monthlyFees === filteredRows[index].monthlyFees
-      );
+      // const originalIndex = rows.findIndex(
+      //   (row) =>
+      //     row.className === filteredRows[index].className &&
+      //     row.class_teacher === filteredRows[index].class_teacher &&
+      //     row.monthlyFees === filteredRows[index].monthlyFees
+      // );
 
-      const updatedRows = rows.filter((_, i) => i !== originalIndex); // Delete from the original rows
-      const needToDeleteRow = rows[originalIndex];
+      // const updatedRows = rows.filter((_, i) => i !== originalIndex); // Delete from the original rows
+      // const needToDeleteRow = rows[originalIndex];
+      const updatedRows = rows.filter((row, i) => row.id !== id); // Delete from the original rows
+      const needToDeleteRow = rows.find(row => row.id == id);
       // console.log(needToDeleteRow);
 
       setRows(updatedRows);
@@ -215,7 +223,7 @@ const Classes = () => {
     setFilteredRows(rows); // Reset filtered rows to original rows
   };
 
-  return (
+  return filteredRows && rows && (
     <div className="p-8 bg-pink-100 min-h-screen">
       <div className="flex gap-4 bg-white rounded-3xl p-2 ">
         <div className="flex items-center space-x-2">

@@ -172,6 +172,10 @@ const SignUpDetails = () => {
       schoolFormData.append("pincode", updatedSchoolDetailsData.pinCode);
       schoolFormData.append("admin", parseInt(data.user.id));
 
+      if (schoolDetailsData.logo) {
+        schoolFormData.append("photo", schoolDetailsData.logo);
+      }
+
       // Call school creation API
       const response = await fetch(`${baseUrl}/school/`, {
         method: "POST",
