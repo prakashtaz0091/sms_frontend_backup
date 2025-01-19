@@ -1,4 +1,4 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import { FcSettings } from "react-icons/fc";
 import Table from "./Table";
 import { IoSearch } from "react-icons/io5";
@@ -20,40 +20,41 @@ const Classes = () => {
   const [classTeacherOptions, setClassTeacherOptions] = useState([]);
   const [rowToEdit, setRowToEdit] = useState(null);
 
-  const getClassTeacherNameFromID = (id) => {
-    const classTeacher = classTeacherOptions.find((option) => option.id == id);
 
-    return classTeacher ? classTeacher.fullName : "";
-  };
 
-  React.useEffect(() => {
-    const getFullNameAndID = (employeeObj) => {
-      return {
-        fullName:
-          employeeObj.employeeFirstName +
-          " " +
-          employeeObj.employeeMiddleName +
-          " " +
-          employeeObj.employeeLastName,
-        id: employeeObj.id,
-      };
-    };
+  useEffect(() => {
+    const getRelatedData = async () => {
+      try {
+        // const response = await api.get("/get_roles/");
+        // roles = response.data.filter(role => role.name.toLowerCase() === "teacher")
 
-    const loadClassTeacherOptions = async () => {
-      const response = await api.get("/employee/");
-      // const classTeachers = response.data;
-      const classTeachers = response.data.map((employeeObj) =>
-        getFullNameAndID(employeeObj)
-      );
+        const response = await api.get("/get_teachers_for_config/");
+        const classTeachers = response.data;
+        // console.log(classTeachers);
 
-      if (classTeachers.length === 0) {
-        alert("Please add a teacher/employee first");
-        navigate("/employees/employeeForm");
-      } else {
-        setClassTeacherOptions(classTeachers);
+        if (classTeachers.length === 0) {
+          alert("Please add a teacher/employee first");
+          navigate("/employees/employeeForm");
+        } else {
+          setClassTeacherOptions(classTeachers);
+        }
+      } catch (error) {
+
+        // console.error("Error fetching roles:", error);
       }
-    };
-    loadClassTeacherOptions();
+
+
+
+
+
+
+
+
+    }
+    getRelatedData();
+
+
+
 
     const loadClasses = async () => {
       const response = await api.get("/class/");
@@ -64,7 +65,17 @@ const Classes = () => {
     };
 
     loadClasses();
+
+
+
   }, []);
+  const getClassTeacherNameFromID = (id) => {
+    const classTeacher = classTeacherOptions.find((option) => option.id == id);
+
+    return classTeacher ? classTeacher.name : "";
+  };
+
+
 
   const handleCreateClass = () => {
     if (className && monthlyFees && classTeacherID) {
@@ -271,7 +282,7 @@ const Classes = () => {
               </option>
               {classTeacherOptions.map((option) => (
                 <option key={option.id} value={option.id}>
-                  {option.fullName}
+                  {option.name}
                 </option>
               ))}
             </select>

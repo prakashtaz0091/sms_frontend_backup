@@ -125,10 +125,10 @@ const StudentAttendanceReport = () => {
       pagination.totalRecords == 0
         ? 0
         : pagination.currentPage * pagination.recordsPerPage -
-          pagination.recordsPerPage;
+        pagination.recordsPerPage;
     let endIndex =
       pagination.currentPage * pagination.recordsPerPage >
-      pagination.totalRecords
+        pagination.totalRecords
         ? pagination.totalRecords
         : pagination.currentPage * pagination.recordsPerPage;
 
@@ -410,10 +410,10 @@ const StudentAttendanceReport = () => {
             {pagination.totalRecords == 0
               ? 0
               : pagination.currentPage * pagination.recordsPerPage -
-                (pagination.recordsPerPage - 1)}{" "}
+              (pagination.recordsPerPage - 1)}{" "}
             &nbsp; to &nbsp;
             {pagination.currentPage * pagination.recordsPerPage >
-            pagination.totalRecords
+              pagination.totalRecords
               ? pagination.totalRecords
               : pagination.currentPage * pagination.recordsPerPage}{" "}
             &nbsp; of {pagination.totalRecords} records
