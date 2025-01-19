@@ -213,7 +213,7 @@ const Classes = () => {
   };
 
   const handleSearch = () => {
-    console.log(rows, searchInput);
+    // console.log(rows, searchInput);
 
     const searchResults = rows.filter(
       (row) =>
