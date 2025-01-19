@@ -18,6 +18,7 @@ const Classes = () => {
   const [filteredRows, setFilteredRows] = useState(rows); // New state for filtered rows
   const [editIndex, setEditIndex] = useState(-1); // This will now store the original index of the row
   const [classTeacherOptions, setClassTeacherOptions] = useState([]);
+  const [rowToEdit, setRowToEdit] = useState(null);
 
   const getClassTeacherNameFromID = (id) => {
     const classTeacher = classTeacherOptions.find((option) => option.id == id);
@@ -92,10 +93,11 @@ const Classes = () => {
       const createClass = async () => {
         try {
           const response = await api.post("/class/", formData);
-          console.log(response.data);
+          // console.log(response.data);
 
           setRows((prevRows) => [...prevRows, newClass]);
           setFilteredRows((prevRows) => [...prevRows, newClass]); // Update filtered rows
+          alert("Class created successfully");
 
         } catch (error) {
           alert(error.response.data.message);
@@ -120,6 +122,7 @@ const Classes = () => {
     // if (originalIndex >= 0) {
     const rowToEdit = filteredRows[index];
     // console.log(rowToEdit);
+    setRowToEdit(rowToEdit);
 
     setClassName(rowToEdit.className);
     setMonthlyFees(rowToEdit.monthlyFees);
@@ -161,7 +164,7 @@ const Classes = () => {
 
       const updateClass = async () => {
         try {
-          const response = await api.put(`/class/${needToUpdateRow.id}/`, formData);
+          const response = await api.put(`/class/${rowToEdit.id}/`, formData);
           // console.log(response);
           setFilteredRows(updatedRows); // Update filtered rows as well
           alert("Class Updated successfully")
@@ -201,7 +204,7 @@ const Classes = () => {
         .delete(`/class/${needToDeleteRow.id}/`)
         .then((response) => {
           // console.log(response);
-          console.log("Class deleted successfully");
+          alert("Class deleted successfully");
         })
         .catch((error) => {
           console.log(error);
