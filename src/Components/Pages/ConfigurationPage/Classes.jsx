@@ -213,10 +213,12 @@ const Classes = () => {
   };
 
   const handleSearch = () => {
+    console.log(rows, searchInput);
+
     const searchResults = rows.filter(
       (row) =>
-        row.class.toLowerCase().includes(searchInput.toLowerCase()) ||
-        row.classTeacher.toLowerCase().includes(searchInput.toLowerCase())
+        row.className.toLowerCase().includes(searchInput.toLowerCase()) ||
+        row.class_teacher_fullname.toLowerCase().includes(searchInput.toLowerCase())
     );
     setFilteredRows(searchResults); // Update the filtered rows based on search input
   };
@@ -287,7 +289,7 @@ const Classes = () => {
             <div className="flex items-center bg-white rounded-full ">
               <input
                 type="text"
-                placeholder="Search Class"
+                placeholder="classname or class teacher name"
                 className="py-2 text-gray-600 placeholder-gray-500 bg-transparent focus:outline-none ml-3"
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
@@ -299,7 +301,7 @@ const Classes = () => {
               />
             </div>
             <div
-              className="border border-[#BCA8EA] p-2 bg-white rounded-full cursor-pointer transition-all duration-200 hover:bg-[#F3E8FF] hover:shadow-lg"
+              className="border border-[#BCA8EA] p-2 bg-white rounded-full cursor-point~er transition-all duration-200 hover:bg-[#F3E8FF] hover:shadow-lg"
               onClick={handleRefresh}
             >
               <FiRefreshCcw className="text-gray-600 transition-transform duration-200 hover:rotate-180" />
