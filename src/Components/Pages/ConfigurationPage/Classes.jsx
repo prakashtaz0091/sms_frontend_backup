@@ -167,7 +167,7 @@ const Classes = () => {
           alert("Class Updated successfully")
         } catch (error) {
           // console.log(error);
-          alert("Class update failed.");
+          alert(error.response.data.message);
         }
       }
       updateClass()
