@@ -3,6 +3,7 @@ import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../../../context/AuthContext";
 import MainDashboard from "../../DashBoard/MainDashBoard";
+import Logo from "../../../assets/Logo.svg";
 
 const SignInForm = () => {
   const navigate = useNavigate();
@@ -109,12 +110,15 @@ const SignInForm = () => {
 
 
   return (
-    <div className="flex min-h-screen">
-      <div className="flex justify-center bg-white w-full">
+    <div className="flex min-h-screen ">
+      <div className="flex justify-center align-middle bg-white w-full">
         {/* Left Side */}
-        <div className="w-1/2 p-8 h-full">
-          <div className="font-bold text-xl">Logo</div>
-          <div className="flex justify-center pt-14">
+        <div className="w-1/2 mt-[-58px] h-full flex flex-col justify-center">
+          <div className="font-bold text-xl">
+            <img src={Logo} alt="Logo" className="w-52 absolute top-4 left-4" />
+
+          </div>
+          <div className="flex justify-center ">
             <div className="w-80">
               <h2 className="text-2xl font-semibold mb-2 text-center">
                 Welcome back
@@ -209,7 +213,7 @@ const SignInForm = () => {
         </div>
 
         {/* Right Side */}
-        <div className="w-1/2 bg-[#f5eae4] pt-12 h-full">
+        <div className="w-1/2 bg-[#f5eae4] h-full flex flex-col justify-center">
           <div className="flex justify-center">
             <div className="w-[400px] ">
               <h2 className="text-2xl font-semibold mb-4 text-center">
