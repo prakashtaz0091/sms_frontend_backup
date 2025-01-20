@@ -1190,9 +1190,13 @@ function AdmissionForm() {
                 <option value="" disabled selected>
                   Religion
                 </option>
-                <option value="Class 1">Sikh</option>
-                <option value="Class 2">Hindu</option>
-                <option value="Class 3">Muslim</option>
+                <option value="Hindu">Hindu</option>
+                <option value="Muslim">Muslim</option>
+                <option value="Christian">Christian</option>
+                <option value="Sikh">Sikh</option>
+                <option value="Buddhist">Buddhist</option>
+                <option value="Jains">Jains</option>
+                <option value="Other">Other</option>
               </select>
             </div>
             <div className="mb-4">
@@ -1208,9 +1212,10 @@ function AdmissionForm() {
                 <option value="" disabled selected>
                   Caste
                 </option>
-                <option value="Class 1">Sikh</option>
-                <option value="Class 2">Hindu</option>
-                <option value="Class 3">Muslim</option>
+                <option value="General">General</option>
+                <option value="OBC">OBC</option>
+                <option value="SC">SC</option>
+                <option value="ST">ST</option>
               </select>
             </div>{" "}
             <div className="mb-4 ">
@@ -1229,7 +1234,11 @@ function AdmissionForm() {
                 <option value="O+">O+</option>
                 <option value="O-">O-</option>
                 <option value="A+">A+</option>
+                <option value="A-">A-</option>
                 <option value="AB+">AB+</option>
+                <option value="AB-">AB-</option>
+                <option value="B+">B+</option>
+                <option value="B-">B-</option>
               </select>
               {errors.bloodGroup && (
                 <p className="text-red-500 text-sm">{errors.bloodGroup}</p>

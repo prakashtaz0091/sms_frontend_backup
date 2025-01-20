@@ -135,14 +135,11 @@ const SchoolDetails = ({
                     <option value="" disabled>
                       School Board
                     </option>
-                    <option value="cbse">CBSE</option>
-                    <option value="icse">ICSE</option>
-                    <option value="state_board">State Boards</option>
-                    <option value="nios">NIOS</option>
-                    <option value="ib">IB</option>
-                    <option value="igcse">IGCSE</option>
-                    <option value="cisce">CISCE</option>
-                    <option value="other_boards">Other Boards</option>
+                    <option value="CBSE">CBSE</option>
+
+                    <option value="SEBA">SEBA</option>
+                    <option value="AHSEC">AHSEC</option>
+                    <option value="OTHERS">OTHERS</option>
                   </Field>
                   <ErrorMessage
                     name="schoolBoard"
