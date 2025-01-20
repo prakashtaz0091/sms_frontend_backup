@@ -22,8 +22,8 @@ export const UpdateContextProvider = ({ children }) => {
 
 
   const onUpdate = (classId, updatedSubjects) => {
-    console.log("Here i am onUpdate")
-    console.log(classId, updatedSubjects)
+    // console.log("Here i am onUpdate")
+    // console.log(classId, updatedSubjects)
     const updateSubjects = async () => {
       try {
         const response = await api.post("/update_class_subjects/", { subjects: updatedSubjects, class_id: classId })
